@@ -21,4 +21,29 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-node_modules
+node_modules/
+node_modules/express/History.md
+node_modules/express/index.js
+node_modules/express/lib/application.js
+node_modules/express/lib/application.js
+node_modules/express/lib/express.js
+node_modules/express/lib/middleware/init.js
+node_modules/express/lib/middleware/query.js
+node_modules/express/lib/request.js
+node_modules/express/lib/response.js
+node_modules/express/lib/router/index.js
+node_modules/express/lib/router/layer.js
+node_modules/express/lib/router/route.js
+node_modules/express/lib/utils.js
+node_modules/express/lib/view.js
+node_modules/express/LICENSE
+node_modules/express/package.json
+node_modules/express/Readme.md
+node_modules/socket.io/lib/client.js
+node_modules/socket.io/lib/index.js
+node_modules/socket.io/lib/namespace.js
+node_modules/socket.io/lib/parent-namespace.js
+node_modules/socket.io/lib/socket.js
+node_modules/socket.io/LICENSE
+node_modules/socket.io/package.json
+node_modules/socket.io/Readme.md
