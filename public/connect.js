@@ -29,6 +29,13 @@ function rgbToHex(r, g, b) {
     return ((r << 16) | (g << 8) | b).toString(16);
 }
 
+var selectedCircle = {
+    x: "",
+    y: ""
+}
+
+var isSelected = false
+
 // Event listener that displays mouse coordinates
 canvas.addEventListener('mousedown', function (event) {
     var mousePos = returnMousePos(canvas, event)
@@ -41,25 +48,50 @@ canvas.addEventListener('mousedown', function (event) {
     console.log("")
     console.log("Circle Location")
 
-    var lengthOfSquare = Math.ceil(canvas.width / numRows)
+    var lengthOfSquare = canvas.width / numRows
 
-    var x = ((Math.ceil(mousePos.x / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2) + 1.5
+    var x = ((Math.ceil(mousePos.x / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2) + .5
     console.log("X: " + x)
 
-    var y = ((Math.ceil(mousePos.y / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2) + 1.5
+    var y = ((Math.ceil(mousePos.y / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2) + .5
     console.log("Y: " + y)
 
-    c.fillStyle = 'rgba(16,255,0,1)'
+    if (hex == "#0000ff" || hex == "#ff0000") {
+        if (!isSelected) {
+            isSelected = true
+            c.strokeStyle = 'rgba(16, 255, 0, 1)'
+            selectedCircle.x = x
+            selectedCircle.y = y
+            c.lineWidth = 1
 
-    c.beginPath()
-    c.arc(x, y , 5, Math.PI * 2, false)
-    c.fill();
-    c.stroke()
+            c.beginPath()
+            c.arc(x, y, 10, Math.PI * 2, false)
+            c.stroke()
+
+        } else if(isSelected) {
+            if (x == selectedCircle.x && y == selectedCircle.y) {
+                console.log("yes")
+                isSelected = false
+                c.strokeStyle = 'rgba(20, 20, 20, 1)'
+                c.lineWidth = 2
+
+                selectedCircle.x = ""
+                selectedCircle.y = ""
+
+                c.beginPath()
+                c.arc(x, y, 10, Math.PI * 2, false)
+                c.stroke()
+            }
+
+        }
+
+    }
+
 })
 
 // Variables to modify canvas properties
 var isWhite = false;
-var numRows = 9
+var numRows = 11
 var player1Color = 'red'
 var player2Color = 'blue '
 
@@ -79,11 +111,14 @@ function draw(i, x, y, isWhite, hasCheckers, color) {
             c.fillRect(x, y, canvas.width / numRows, canvas.width / numRows)
 
             if (hasCheckers) {
-                c.beginPath()
-                c.arc(x + (canvas.width / numRows) / 2, y + (canvas.width / numRows) / 2, 10, Math.PI * 2, false)
-                c.fillStyle = color;
-                c.fill();
-                c.stroke()
+                setTimeout(function () {
+                    c.beginPath()
+                    c.arc(x + (canvas.width / numRows) / 2, y + (canvas.width / numRows) / 2, 10, Math.PI * 2, false)
+                    c.fillStyle = color;
+                    c.fill();
+                    c.stroke()
+                }, 1000)
+
             }
 
             draw(i + 1, x + canvas.width / numRows, y, !isWhite, hasCheckers, color)
