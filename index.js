@@ -26,10 +26,19 @@ var io = socket(server)
 
 io.on('connection', function() {
     console.log('Connection made!')
+
+    io.emit('calculate-coordinates'); 
 })
 
 // Create route that will let us write our api
 var router = express.Router()
+
+// Size will be determiend by another page
+var boardSize = 10
+
+// 2D array of player pieces. Each piece has a color, x and y coordinate, a king status and an alive status
+var p1 = [boardSize + Math.floor(boardSize / 2)][5]
+var p2 = [boardSize + Math.floor(boardSize / 2)][5]
 
 // Makes all of our APIs prefix with /api
 app.use('/api', router)
