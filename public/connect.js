@@ -38,6 +38,26 @@ var selectedCircle = {
 
 var isSelected = false
 
+function selectPiece(x, y) {
+    isSelected = true
+    c.strokeStyle = 'rgba(255, 255, 255, 1)'
+    selectedCircle.x = x
+    selectedCircle.y = y
+    c.lineWidth = 2
+
+    c.beginPath()
+    c.arc(x, y, 10, Math.PI * 2, false)
+    c.stroke()
+}
+
+function deselectPiece() {
+    isSelected = false
+    selectedCircle.x = ""
+    selectedCircle.y = ""
+    c.strokeStyle = 'rgba(20, 20, 20, 1)'
+    animate()
+}
+
 // Event listener that displays mouse coordinates
 canvas.addEventListener('mousedown', function (event) {
     var mousePos = returnMousePos(canvas, event)
@@ -59,53 +79,30 @@ canvas.addEventListener('mousedown', function (event) {
 
     if (hex == player1Color || hex == player2Color) {
         if (!isSelected) {
-            isSelected = true
-            c.strokeStyle = 'rgba(255, 255, 255, 1)'
-            selectedCircle.x = x
-            selectedCircle.y = y
-            c.lineWidth = 2
-
-            c.beginPath()
-            c.arc(x, y, 10, Math.PI * 2, false)
-            c.stroke()
-
+            selectPiece(x, y)
         } else if (isSelected) {
 
             // Deselects a game pieces
             if (x == selectedCircle.x && y == selectedCircle.y) {
-                isSelected = false
-                selectedCircle.x = ""
-                selectedCircle.y = ""
-                c.strokeStyle = 'rgba(20, 20, 20, 1)'
-                animate()
-                // console.log("yes")
-                // isSelected = false
-                // c.strokeStyle = 'rgba(20, 20, 20, 1)'
-                // c.lineWidth = 2
+                deselectPiece()
 
-                // selectedCircle.x = ""
-                // selectedCircle.y = ""
-
-                // c.beginPath()
-                // c.arc(x, y, 10, Math.PI * 2, false)
-                // c.stroke()
             }
 
         }
 
-    } else if(isSelected && hex != player1Color && hex != player2Color) {
+    } else if (isSelected && hex != player1Color && hex != player2Color && hex != 'rgba(177, 177, 177, 1)') {
         console.log('Selected X: ' + selectedCircle.x)
         console.log('Selected Y: ' + selectedCircle.y)
 
-        for(var i = 0 ; i < player2Pieces.length ; i++) {
+        for (var i = 0; i < player2Pieces.length; i++) {
 
             var tempVarX = Math.abs(selectedCircle.x - player2Pieces[i].x)
             var tempVarY = Math.abs(selectedCircle.y - player2Pieces[i].y)
 
-            if(tempVarX < 20 && tempVarY < 20) {
+            if (tempVarX < 20 && tempVarY < 20) {
                 console.log('yooooo im in here')
-                player2Pieces[i].x = x; 
-                player2Pieces[i].y = y; 
+                player2Pieces[i].x = x;
+                player2Pieces[i].y = y;
                 isSelected = false
                 selectedCircle.x = ""
                 selectedCircle.y = ""
@@ -113,15 +110,15 @@ canvas.addEventListener('mousedown', function (event) {
                 animate()
             }
         }
-        for(var i = 0 ; i < player1Pieces.length ; i++) {
+        for (var i = 0; i < player1Pieces.length; i++) {
 
             var tempVarX = Math.abs(selectedCircle.x - player1Pieces[i].x)
             var tempVarY = Math.abs(selectedCircle.y - player1Pieces[i].y)
 
-            if(tempVarX < 20 && tempVarY < 20) {
+            if (tempVarX < 20 && tempVarY < 20) {
                 console.log('yooooo im in here')
-                player1Pieces[i].x = x; 
-                player1Pieces[i].y = y; 
+                player1Pieces[i].x = x;
+                player1Pieces[i].y = y;
                 isSelected = false
                 selectedCircle.x = ""
                 selectedCircle.y = ""
@@ -135,7 +132,7 @@ canvas.addEventListener('mousedown', function (event) {
 
 // Variables to modify canvas properties
 var isWhite = false;
-var numRows = 7
+var numRows = 9
 var player1Color = 'rgba(66, 134, 244, 1)'
 var player2Color = 'rgba(66, 244, 98, 1)'
 
@@ -143,6 +140,11 @@ var checkersPiece = {
     x: (canvas.width / 10) / 2,
     y: (canvas.width / 10) / 2
 }
+
+/*
+    These are the seed pieces that will be used to generate all
+    other game pieces on the board
+*/
 
 var player1Pieces = []
 var player2Pieces = []
@@ -172,7 +174,6 @@ player1Pieces = [
 ]
 
 if (numRows % 2 == 0) {
-
 
     player2Pieces = [
         {
@@ -223,10 +224,14 @@ if (numRows % 2 == 0) {
     ]
 }
 
+/*
+    Loops through each seed piece in a players set
+    of pieces and generates the rest of the pieces
+    that the player will have on the board
+*/
 function calculatePieces(pieces) {
     for (var i = 0; i < 3; i++) {
-        for (var coordX = pieces[i].x + 2*(canvas.width / numRows); coordX < canvas.width; coordX += (canvas.width / numRows) * 2) {
-            console.log('Adding')
+        for (var coordX = pieces[i].x + 2 * (canvas.width / numRows); coordX < canvas.width; coordX += (canvas.width / numRows) * 2) {
             pieces.push({
                 x: coordX,
                 y: pieces[i].y,
@@ -240,19 +245,6 @@ function calculatePieces(pieces) {
 
 calculatePieces(player1Pieces)
 calculatePieces(player2Pieces)
-// for (var y = (canvas.width / numRows) / 2; y < canvas.width / 3; y += (canvas.width / numRows)) {
-
-//     for (var x = (canvas.width / numRows) / 2; x < canvas.width; x += (canvas.width / numRows)) {
-//         pieces.push({
-//             x: x,
-//             y: y,
-//             color: 'red',
-//             isKing: false,
-//             isAlive: true
-//         })
-//     }
-
-// }
 
 function drawPieces(pieces) {
     console.log(pieces.length)
@@ -280,19 +272,6 @@ function draw(i, x, y, isWhite, hasCheckers, color) {
         } else {
             c.fillStyle = 'rgba(20,20,20,1)'
             c.fillRect(x, y, canvas.width / numRows, canvas.width / numRows)
-
-            /*
-            if (hasCheckers) {
-                setTimeout(function () {
-                    c.beginPath()
-                    c.arc(x + (canvas.width / numRows) / 2, y + (canvas.width / numRows) / 2, 10, Math.PI * 2, false)
-                    c.fillStyle = color;
-                    c.fill();
-                    c.stroke()
-                }, 10)
-
-            }*/
-
             draw(i + 1, x + canvas.width / numRows, y, !isWhite, hasCheckers, color)
         }
     }
@@ -321,7 +300,8 @@ function drawBoard() {
             isWhite = !isWhite
         }
     }
-    if(numRows % 2 == 1) {
+    // Ensures that the gameboard square colors won't be inverted
+    if (numRows % 2 == 1) {
         isWhite = !isWhite
     }
 }
@@ -331,18 +311,6 @@ function animate() {
     drawBoard()
     drawPieces(player1Pieces)
     drawPieces(player2Pieces)
-
-    // setTimeout(function () {
-    //     drawBoard()
-    // }, 1000)
-
-    // setTimeout(function () {
-    //     drawPieces(player1Pieces)
-    //     drawPieces(player2Pieces)
-    // }, 2000)
-
-
-
 }
 
 animate(); 
