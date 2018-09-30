@@ -135,7 +135,7 @@ canvas.addEventListener('mousedown', function (event) {
 
 // Variables to modify canvas properties
 var isWhite = false;
-var numRows = 8
+var numRows = 7
 var player1Color = 'rgba(66, 134, 244, 1)'
 var player2Color = 'rgba(66, 244, 98, 1)'
 
@@ -320,6 +320,9 @@ function drawBoard() {
             }
             isWhite = !isWhite
         }
+    }
+    if(numRows % 2 == 1) {
+        isWhite = !isWhite
     }
 }
 
