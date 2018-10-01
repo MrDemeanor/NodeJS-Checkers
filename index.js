@@ -24,13 +24,34 @@ var server = app.listen(5000, function() {
 */
 var io = socket(server)
 
+const connectedSockets = new Set()
+
 io.on('connection', function(socket) {
+
+    // Let's us know that a connection has been established
     console.log('Connection made!')
 
+    // Delete?
     io.emit('calculate-coordinates'); 
 
+    /*
+        Disconnect any incoming socket connections if there are
+        already two players playing in multiplayer. Create a
+        separate socket for spectators
+    */
+    if(connectedSockets.size >= 2) {
+        socket.disconnect(true)
+    } else {
+        connectedSockets.add(socket)
+    }
+
+    // Updates the board 
     socket.on('updateBoard', function(data){
         io.sockets.emit('updateBoard', data)
+    })
+
+    socket.on('disconnect', function(socket) {
+        connectedSockets.delete(socket)
     })
 })
 

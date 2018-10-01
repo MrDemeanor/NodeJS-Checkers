@@ -1,5 +1,11 @@
 // Establish connection to server on port 5000
-var socket = io.connect('http://192.168.0.4:5000')
+var socket = io.connect('http://localhost:5000')
+
+/*
+    If we are in production, use the IP address of the server
+    to access from a phone
+*/
+// var socket = io.connect('http://192.168.6.93:5000')
 
 // Set the size of the canvas based on the screen resolution
 var canvas = document.getElementById('gamecanvas')
@@ -98,15 +104,15 @@ canvas.addEventListener('mousedown', function (event) {
         if (!isSelected) {
             selectPiece(x, y)
         } else if (isSelected) {
-
             // Deselects a game pieces
             if (x == selectedCircle.x && y == selectedCircle.y) {
                 deselectPiece()
-
             }
-
         }
-
+    /* 
+        If we have selected a piece, and where we click is not equal to player1 or player2's color, or a white square
+        or if the square that we selected is not within a certain frame
+    */
     } else if (isSelected && hex != player1Color && hex != player2Color && hex != 'rgba(177, 177, 177, 1)') {
         console.log('Selected X: ' + selectedCircle.x)
         console.log('Selected Y: ' + selectedCircle.y)
@@ -119,12 +125,12 @@ canvas.addEventListener('mousedown', function (event) {
             console.log('tempVarX: ' + tempVarX)
             console.log('tempVarY: ' + tempVarY)
             console.log('')
-
+            // If we have found the piece in the collection of pieces
             if (tempVarX < 20 && tempVarY < 20) {
                 movePiece(x, y, i, 2)
                 socket.emit('updateBoard', {
-                    player1: player1Pieces, 
-                    player2: player2Pieces, 
+                    player1: player1Pieces,
+                    player2: player2Pieces,
                     dimension: canvas.width
                 })
             }
@@ -138,11 +144,12 @@ canvas.addEventListener('mousedown', function (event) {
             console.log('tempVarY: ' + tempVarY)
             console.log('')
 
+            // If we have found the piece in the collection of pieces
             if (tempVarX < 20 && tempVarY < 20) {
                 movePiece(x, y, i, 1)
                 socket.emit('updateBoard', {
-                    player1: player1Pieces, 
-                    player2: player2Pieces, 
+                    player1: player1Pieces,
+                    player2: player2Pieces,
                     dimension: canvas.width
                 })
             }
@@ -151,14 +158,14 @@ canvas.addEventListener('mousedown', function (event) {
 
 })
 
-socket.on('updateBoard', function(data) {
+socket.on('updateBoard', function (data) {
 
-    var ratio = canvas.width / data.dimension 
+    var ratio = canvas.width / data.dimension
 
-    for(var i = 0 ; i < data.player1.length ; i++) {
+    for (var i = 0; i < data.player1.length; i++) {
         data.player1[i].x *= ratio
         data.player1[i].y *= ratio
-        
+
         data.player2[i].x *= ratio
         data.player2[i].y *= ratio
     }
