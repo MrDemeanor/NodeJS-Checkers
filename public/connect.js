@@ -158,6 +158,10 @@ canvas.addEventListener('mousedown', function (event) {
 
 })
 
+socket.on('getouttahere', function() {
+    alert('Multiplayer lobby is full. To view this game as a spectator, type in the link you took you to this page + /spectator')
+})
+
 socket.on('updateBoard', function (data) {
 
     var ratio = canvas.width / data.dimension

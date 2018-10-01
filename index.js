@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json())
 
 // Create server and set to port 5000
-var server = app.listen(5000, function() {
+var server = app.listen(5000, function () {
     console.log('Listening on port 5000')
 })
 
@@ -26,31 +26,32 @@ var io = socket(server)
 
 const connectedSockets = new Set()
 
-io.on('connection', function(socket) {
+io.on('connection', function (socket) {
 
     // Let's us know that a connection has been established
     console.log('Connection made!')
 
     // Delete?
-    io.emit('calculate-coordinates'); 
+    io.emit('calculate-coordinates');
 
     /*
         Disconnect any incoming socket connections if there are
         already two players playing in multiplayer. Create a
         separate socket for spectators
     */
-    if(connectedSockets.size >= 2) {
+    if (connectedSockets.size >= 2) {
+        socket.emit('getouttahere')
         socket.disconnect(true)
     } else {
         connectedSockets.add(socket)
     }
 
     // Updates the board 
-    socket.on('updateBoard', function(data){
+    socket.on('updateBoard', function (data) {
         io.sockets.emit('updateBoard', data)
     })
 
-    socket.on('disconnect', function(socket) {
+    socket.on('disconnect', function (socket) {
         connectedSockets.delete(socket)
     })
 })
@@ -69,7 +70,7 @@ var p2 = [boardSize + Math.floor(boardSize / 2)][5]
 app.use('/api', router)
 
 // API access at http://localhost:5000/api
-router.get('/', function(req, res) {
+router.get('/', function (req, res) {
     res.json({
         message: 'This API is working!'
     })
