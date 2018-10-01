@@ -1,5 +1,5 @@
 // Establish connection to server on port 5000
-var socket = io.connect('http://localhost:5000')
+var socket = io.connect('http://192.168.0.4:5000')
 
 // Set the size of the canvas based on the screen resolution
 var canvas = document.getElementById('gamecanvas')
@@ -58,6 +58,23 @@ function deselectPiece() {
     animate()
 }
 
+function movePiece(x, y, i, playerNumber) {
+    console.log('yooooo im in here')
+    if (playerNumber == 1) {
+        player1Pieces[i].x = x;
+        player1Pieces[i].y = y;
+    } else {
+        player2Pieces[i].x = x;
+        player2Pieces[i].y = y;
+    }
+
+    isSelected = false
+    selectedCircle.x = ""
+    selectedCircle.y = ""
+    c.strokeStyle = 'rgba(20, 20, 20, 1)'
+    animate()
+}
+
 // Event listener that displays mouse coordinates
 canvas.addEventListener('mousedown', function (event) {
     var mousePos = returnMousePos(canvas, event)
@@ -99,15 +116,17 @@ canvas.addEventListener('mousedown', function (event) {
             var tempVarX = Math.abs(selectedCircle.x - player2Pieces[i].x)
             var tempVarY = Math.abs(selectedCircle.y - player2Pieces[i].y)
 
+            console.log('tempVarX: ' + tempVarX)
+            console.log('tempVarY: ' + tempVarY)
+            console.log('')
+
             if (tempVarX < 20 && tempVarY < 20) {
-                console.log('yooooo im in here')
-                player2Pieces[i].x = x;
-                player2Pieces[i].y = y;
-                isSelected = false
-                selectedCircle.x = ""
-                selectedCircle.y = ""
-                c.strokeStyle = 'rgba(20, 20, 20, 1)'
-                animate()
+                movePiece(x, y, i, 2)
+                socket.emit('updateBoard', {
+                    player1: player1Pieces, 
+                    player2: player2Pieces, 
+                    dimension: canvas.width
+                })
             }
         }
         for (var i = 0; i < player1Pieces.length; i++) {
@@ -115,19 +134,39 @@ canvas.addEventListener('mousedown', function (event) {
             var tempVarX = Math.abs(selectedCircle.x - player1Pieces[i].x)
             var tempVarY = Math.abs(selectedCircle.y - player1Pieces[i].y)
 
+            console.log('tempVarX: ' + tempVarX)
+            console.log('tempVarY: ' + tempVarY)
+            console.log('')
+
             if (tempVarX < 20 && tempVarY < 20) {
-                console.log('yooooo im in here')
-                player1Pieces[i].x = x;
-                player1Pieces[i].y = y;
-                isSelected = false
-                selectedCircle.x = ""
-                selectedCircle.y = ""
-                c.strokeStyle = 'rgba(20, 20, 20, 1)'
-                animate()
+                movePiece(x, y, i, 1)
+                socket.emit('updateBoard', {
+                    player1: player1Pieces, 
+                    player2: player2Pieces, 
+                    dimension: canvas.width
+                })
             }
         }
     }
 
+})
+
+socket.on('updateBoard', function(data) {
+
+    var ratio = canvas.width / data.dimension 
+
+    for(var i = 0 ; i < data.player1.length ; i++) {
+        data.player1[i].x *= ratio
+        data.player1[i].y *= ratio
+        
+        data.player2[i].x *= ratio
+        data.player2[i].y *= ratio
+    }
+
+    player1Pieces = data.player1
+    player2Pieces = data.player2
+
+    animate()
 })
 
 // Variables to modify canvas properties

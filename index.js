@@ -24,10 +24,14 @@ var server = app.listen(5000, function() {
 */
 var io = socket(server)
 
-io.on('connection', function() {
+io.on('connection', function(socket) {
     console.log('Connection made!')
 
     io.emit('calculate-coordinates'); 
+
+    socket.on('updateBoard', function(data){
+        io.sockets.emit('updateBoard', data)
+    })
 })
 
 // Create route that will let us write our api
