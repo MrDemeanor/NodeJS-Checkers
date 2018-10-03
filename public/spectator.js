@@ -1,6 +1,6 @@
 // Establish connection to server on port 5000
-var socket = io('http://192.168.0.4:5000', { query: 'person=player' })
-socket.connect()
+// var socket = io.connect('http://localhost:5000')
+var socket = io('http://192.168.0.4:5000', { query: 'person=spectator' })
 
 /*
     If we are in production, use the IP address of the server
@@ -18,12 +18,6 @@ if (window.innerHeight < window.innerWidth) {
     canvas.width = window.innerWidth / 1.2
     canvas.height = window.innerWidth / 1.2
 }
-
-socket.on('who-are-you', function() {
-    socket.emit('i-am-...', {
-        me: 'player'
-    })
-})
 
 // Allows us to draw shapes on the screen
 var c = canvas.getContext('2d')
@@ -51,26 +45,6 @@ var selectedCircle = {
 
 var isSelected = false
 
-function selectPiece(x, y) {
-    isSelected = true
-    c.strokeStyle = 'rgba(255, 255, 255, 1)'
-    selectedCircle.x = x
-    selectedCircle.y = y
-    c.lineWidth = 2
-
-    c.beginPath()
-    c.arc(x, y, 10, Math.PI * 2, false)
-    c.stroke()
-}
-
-function deselectPiece() {
-    isSelected = false
-    selectedCircle.x = ""
-    selectedCircle.y = ""
-    c.strokeStyle = 'rgba(20, 20, 20, 1)'
-    animate()
-}
-
 function movePiece(x, y, i, playerNumber) {
     console.log('yooooo im in here')
     if (playerNumber == 1) {
@@ -88,86 +62,86 @@ function movePiece(x, y, i, playerNumber) {
     animate()
 }
 
-// Event listener that displays mouse coordinates
-canvas.addEventListener('mousedown', function (event) {
-    var mousePos = returnMousePos(canvas, event)
+// // Event listener that displays mouse coordinates
+// canvas.addEventListener('mousedown', function (event) {
+//     var mousePos = returnMousePos(canvas, event)
 
-    var pixelData = c.getImageData(mousePos.x, mousePos.y, 1, 1).data
-    var hex = 'rgba(' + pixelData[0] + ', ' + pixelData[1] + ', ' + pixelData[2] + ', 1)'
+//     var pixelData = c.getImageData(mousePos.x, mousePos.y, 1, 1).data
+//     var hex = 'rgba(' + pixelData[0] + ', ' + pixelData[1] + ', ' + pixelData[2] + ', 1)'
 
-    console.log("X: " + mousePos.x + " Y:" + mousePos.y + " " + hex)
-    console.log("")
-    console.log("Circle Location")
+//     console.log("X: " + mousePos.x + " Y:" + mousePos.y + " " + hex)
+//     console.log("")
+//     console.log("Circle Location")
 
-    var lengthOfSquare = canvas.width / numRows
+//     var lengthOfSquare = canvas.width / numRows
 
-    var x = ((Math.ceil(mousePos.x / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
-    console.log("X: " + x)
+//     var x = ((Math.ceil(mousePos.x / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
+//     console.log("X: " + x)
 
-    var y = ((Math.ceil(mousePos.y / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
-    console.log("Y: " + y)
+//     var y = ((Math.ceil(mousePos.y / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
+//     console.log("Y: " + y)
 
-    if (hex == player1Color || hex == player2Color) {
-        if (!isSelected) {
-            selectPiece(x, y)
-        } else if (isSelected) {
-            // Deselects a game pieces
-            if (x == selectedCircle.x && y == selectedCircle.y) {
-                deselectPiece()
-            }
-        }
-    /* 
-        If we have selected a piece, and where we click is not equal to player1 or player2's color, or a white square
-        or if the square that we selected is not within a certain frame
-    */
-    } else if (isSelected && hex != player1Color && hex != player2Color && hex != 'rgba(177, 177, 177, 1)') {
-        console.log('Selected X: ' + selectedCircle.x)
-        console.log('Selected Y: ' + selectedCircle.y)
+//     if (hex == player1Color || hex == player2Color) {
+//         if (!isSelected) {
+//             selectPiece(x, y)
+//         } else if (isSelected) {
+//             // Deselects a game pieces
+//             if (x == selectedCircle.x && y == selectedCircle.y) {
+//                 deselectPiece()
+//             }
+//         }
+//     /* 
+//         If we have selected a piece, and where we click is not equal to player1 or player2's color, or a white square
+//         or if the square that we selected is not within a certain frame
+//     */
+//     } else if (isSelected && hex != player1Color && hex != player2Color && hex != 'rgba(177, 177, 177, 1)') {
+//         console.log('Selected X: ' + selectedCircle.x)
+//         console.log('Selected Y: ' + selectedCircle.y)
 
-        for (var i = 0; i < player2Pieces.length; i++) {
+//         for (var i = 0; i < player2Pieces.length; i++) {
 
-            var tempVarX = Math.abs(selectedCircle.x - player2Pieces[i].x)
-            var tempVarY = Math.abs(selectedCircle.y - player2Pieces[i].y)
+//             var tempVarX = Math.abs(selectedCircle.x - player2Pieces[i].x)
+//             var tempVarY = Math.abs(selectedCircle.y - player2Pieces[i].y)
 
-            console.log('tempVarX: ' + tempVarX)
-            console.log('tempVarY: ' + tempVarY)
-            console.log('')
-            // If we have found the piece in the collection of pieces
-            if (tempVarX < 20 && tempVarY < 20) {
-                movePiece(x, y, i, 2)
-                socket.emit('updateBoard', {
-                    player1: player1Pieces,
-                    player2: player2Pieces,
-                    dimension: canvas.width
-                })
-            }
-        }
-        for (var i = 0; i < player1Pieces.length; i++) {
+//             console.log('tempVarX: ' + tempVarX)
+//             console.log('tempVarY: ' + tempVarY)
+//             console.log('')
+//             // If we have found the piece in the collection of pieces
+//             if (tempVarX < 20 && tempVarY < 20) {
+//                 movePiece(x, y, i, 2)
+//                 socket.emit('updateBoard', {
+//                     player1: player1Pieces,
+//                     player2: player2Pieces,
+//                     dimension: canvas.width
+//                 })
+//             }
+//         }
+//         for (var i = 0; i < player1Pieces.length; i++) {
 
-            var tempVarX = Math.abs(selectedCircle.x - player1Pieces[i].x)
-            var tempVarY = Math.abs(selectedCircle.y - player1Pieces[i].y)
+//             var tempVarX = Math.abs(selectedCircle.x - player1Pieces[i].x)
+//             var tempVarY = Math.abs(selectedCircle.y - player1Pieces[i].y)
 
-            console.log('tempVarX: ' + tempVarX)
-            console.log('tempVarY: ' + tempVarY)
-            console.log('')
+//             console.log('tempVarX: ' + tempVarX)
+//             console.log('tempVarY: ' + tempVarY)
+//             console.log('')
 
-            // If we have found the piece in the collection of pieces
-            if (tempVarX < 20 && tempVarY < 20) {
-                movePiece(x, y, i, 1)
-                socket.emit('updateBoard', {
-                    player1: player1Pieces,
-                    player2: player2Pieces,
-                    dimension: canvas.width
-                })
-            }
-        }
-    }
+//             // If we have found the piece in the collection of pieces
+//             if (tempVarX < 20 && tempVarY < 20) {
+//                 movePiece(x, y, i, 1)
+//                 socket.emit('updateBoard', {
+//                     player1: player1Pieces,
+//                     player2: player2Pieces,
+//                     dimension: canvas.width
+//                 })
+//             }
+//         }
+//     }
 
-})
+// })
 
-socket.on('getouttahere', function() {
-    alert('Multiplayer lobby is full. To view this game as a spectator, type in the link you took you to this page + /spectator')
-})
+// socket.on('getouttahere', function() {
+//     alert('Multiplayer lobby is full. To view this game as a spectator, type in the link you took you to this page + /spectator')
+// })
 
 socket.on('updateBoard', function (data) {
 

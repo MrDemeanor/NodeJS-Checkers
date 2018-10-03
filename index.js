@@ -2,6 +2,7 @@
 var express = require('express')
 var socket = require('socket.io')
 var bodyParser = require('body-parser')
+var path = require('path')
 
 // Create Express app
 var app = express()
@@ -18,32 +19,44 @@ var server = app.listen(5000, function () {
     console.log('Listening on port 5000')
 })
 
+app.get('/spectator', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/spectator.html'));
+});
+
+
+
 /*
     Allow the server to establish bidirectional communication with 
     web browser client
 */
 var io = socket(server)
 
-const connectedSockets = new Set()
+var playerSocket = new Set()
+var spectatorSocket = new Set()
+
+io.use(function(socket, next) {
+    // var handshakeData = socket.request;
+    // console.log("middleware:", handshakeData._query['person']);
+    next();
+  });
 
 io.on('connection', function (socket) {
 
     // Let's us know that a connection has been established
     console.log('Connection made!')
 
-    // Delete?
-    io.emit('calculate-coordinates');
+    var handshakeData = socket.request;
 
-    /*
-        Disconnect any incoming socket connections if there are
-        already two players playing in multiplayer. Create a
-        separate socket for spectators
-    */
-    if (connectedSockets.size >= 2) {
-        socket.emit('getouttahere')
-        socket.disconnect(true)
-    } else {
-        connectedSockets.add(socket)
+    if(handshakeData._query['person'] == 'player') {
+        if (playerSocket.size >= 2) {
+            console.log('Too Big')
+            socket.emit('getouttahere')
+            socket.disconnect(true)
+        } else {
+            playerSocket.add(socket.id)
+        }
+    } else if(handshakeData._query['person'] == 'spectator') {
+        spectatorSocket.add(socket.id)
     }
 
     // Updates the board 
@@ -51,8 +64,9 @@ io.on('connection', function (socket) {
         io.sockets.emit('updateBoard', data)
     })
 
-    socket.on('disconnect', function (socket) {
-        connectedSockets.delete(socket)
+    socket.on('disconnect', function () {
+        playerSocket.delete(socket.id)
+        spectatorSocket.delete(socket.id)
     })
 })
 
