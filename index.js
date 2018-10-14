@@ -4,6 +4,8 @@ var socket = require('socket.io')
 var bodyParser = require('body-parser')
 var path = require('path')
 
+require('./twilio')
+
 // Create Express app
 var app = express()
 
@@ -19,9 +21,62 @@ var server = app.listen(5000, function () {
     console.log('Listening on port 5000')
 })
 
-app.get('/spectator', function(req, res) {
+app.get('/spectator', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/spectator.html'));
 });
+
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname + '/public/home.html'))
+})
+
+app.get('/singleplayer', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/singleplayer.html'))
+})
+
+app.get('/multiplayer/', function (req, res) {
+
+    res.sendFile(path.join(__dirname + '/public/multiplayer.html'))
+
+    var username = req.param('username')
+
+    setTimeout(function () {
+        if (playerSocket.size == 1) {
+            player1 = username
+        } else if (playerSocket.size == 2) {
+            player2 = username
+        }
+    }, 2000)
+})
+
+app.get('/subscribe', function (req, res) {
+    res.sendFile(path.join(__dirname + '/public/subscribe.html'))
+})
+
+app.get('/subscribe/myNumber', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/thankyousubscribe.html'))
+
+    var number = req.param('number')
+
+    console.log('My number: ' + number)
+
+    Twilio.subscribe(number)
+
+})
+
+app.get('/unsubscribe', function (req, res) {
+    res.sendFile(path.join(__dirname + '/public/unsubscribe.html'))
+})
+
+app.get('/unsubscribe/myNumber', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/thankyouunsubscribe.html'))
+
+    var number = req.param('number')
+
+    console.log('My number: ' + number)
+
+    Twilio.unsubscribe(number)
+
+})
 
 
 
@@ -34,11 +89,10 @@ var io = socket(server)
 var playerSocket = new Set()
 var spectatorSocket = new Set()
 
-io.use(function(socket, next) {
-    // var handshakeData = socket.request;
-    // console.log("middleware:", handshakeData._query['person']);
-    next();
-  });
+var player1, player2
+
+var player1Score = 0
+var player2Score = 0
 
 io.on('connection', function (socket) {
 
@@ -47,26 +101,82 @@ io.on('connection', function (socket) {
 
     var handshakeData = socket.request;
 
-    if(handshakeData._query['person'] == 'player') {
+    if (handshakeData._query['person'] == 'player') {
         if (playerSocket.size >= 2) {
             console.log('Too Big')
             socket.emit('getouttahere')
             socket.disconnect(true)
         } else {
+            if (playerSocket.size == 0) {
+                socket.emit('whosturn', {
+                    turn: true,
+                    player: '1',
+                    color: 'rgba(66, 134, 244, 1)'
+                })
+            } else if (playerSocket.size == 1) {
+                socket.emit('whosturn', {
+                    turn: false,
+                    player: '2',
+                    color: 'rgba(66, 244, 98, 1)'
+                })
+            }
             playerSocket.add(socket.id)
         }
-    } else if(handshakeData._query['person'] == 'spectator') {
+    } else if (handshakeData._query['person'] == 'spectator') {
         spectatorSocket.add(socket.id)
     }
 
     // Updates the board 
-    socket.on('updateBoard', function (data) {
+    socket.on('updateBoardt', function (data) {
         io.sockets.emit('updateBoard', data)
     })
 
+    socket.on('switchTurn', function () {
+        io.sockets.emit('turnSwitched')
+    })
+
+    socket.on('delete', function (data) {
+        io.sockets.emit('deletePiece', {
+            x: data.x,
+            y: data.y
+        })
+    })
+
     socket.on('disconnect', function () {
+
+        if (handshakeData._query['person'] != 'spectator') {
+            io.sockets.emit('disconnected')
+            player1 = null
+            player2 = null
+            player1Score = 0
+            player2Score = 0
+        }
+
         playerSocket.delete(socket.id)
         spectatorSocket.delete(socket.id)
+
+    })
+
+    socket.on('givepoint', function(data) {
+        if(data.playerNumber == '1') {
+            player1Score++
+            if(player1Score == 13) {
+                Twilio.pushWinningNotification(player1, player2)
+                io.sockets.emit('gameover')
+            } else {
+                Twilio.pushScoreNotification(player1, player2, player1Score, player2Score)
+            }
+        } else if(data.playerNumber == '2') {
+            player2Score++
+            if(player2Score == 13) {
+                // Player 2 Won
+                Twilio.pushWinningNotification(player2, player1)
+                io.sockets.emit('gameover')
+            } else {
+                Twilio.pushScoreNotification(player2, player1, player2Score, player1Score)
+            }
+            
+        }
     })
 })
 

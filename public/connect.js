@@ -1,5 +1,6 @@
 // Establish connection to server on port 5000
-var socket = io('http://192.168.0.4:5000', { query: 'person=player' })
+var socket = io('https://centipedecheckers.ngrok.io', { query: 'person=player' })
+// var socket = io('http://localhost:5000', { query: 'person=player' })
 socket.connect()
 
 /*
@@ -19,11 +20,40 @@ if (window.innerHeight < window.innerWidth) {
     canvas.height = window.innerWidth / 1.2
 }
 
-socket.on('who-are-you', function() {
+socket.on('who-are-you', function () {
     socket.emit('i-am-...', {
         me: 'player'
     })
 })
+
+var myTurn
+var myPlayerNumber
+
+socket.on('gameover', function() {
+    alert('The game has ended!')
+    window.location.replace("http://centipedecheckers.ngrok.io");
+})
+
+socket.on('disconnected', function () {
+    alert('Player has disconnected from the server')
+    window.location.replace("http://centipedecheckers.ngrok.io");
+})
+
+socket.on('whosturn', function (data) {
+    myTurn = data.turn
+    if (data.player == '1') {
+        playerColor = 'rgba(66, 134, 244, 1)'
+    } else {
+        playerColor = 'rgba(66, 244, 98, 1)'
+    }
+    // playerColor = data.color
+    myPlayerNumber = data.player
+    console.log('I am ' + data.player)
+})
+
+var playerColor
+var player1Color = 'rgba(66, 134, 244, 1)'
+var player2Color = 'rgba(66, 244, 98, 1)'
 
 // Allows us to draw shapes on the screen
 var c = canvas.getContext('2d')
@@ -71,101 +101,329 @@ function deselectPiece() {
     animate()
 }
 
-function movePiece(x, y, i, playerNumber) {
-    console.log('yooooo im in here')
-    if (playerNumber == 1) {
-        player1Pieces[i].x = x;
-        player1Pieces[i].y = y;
+function movePiece(x, y, i, playerNumber, multiply) {
+    if (playerNumber == '1') {
+        player1Pieces[i].x = x
+        player1Pieces[i].y = y
+        player1Pieces[i].position += (canvas.width / numRows) * multiply
+
+        setTimeout(function() {
+            if(player1Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
+                player1Pieces[i].isKing = true
+            }
+        }, 500)
+        
     } else {
-        player2Pieces[i].x = x;
-        player2Pieces[i].y = y;
+        player2Pieces[i].x = x
+        player2Pieces[i].y = y
+        player2Pieces[i].position += (canvas.width / numRows) * multiply
+
+        setTimeout(function() {
+            if(player2Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
+                player2pieces[i].isKing = true
+            }
+        }, 500)
+        
     }
 
     isSelected = false
     selectedCircle.x = ""
     selectedCircle.y = ""
     c.strokeStyle = 'rgba(20, 20, 20, 1)'
+    socket.emit('switchTurn')
     animate()
+
+
 }
 
-// Event listener that displays mouse coordinates
-canvas.addEventListener('mousedown', function (event) {
-    var mousePos = returnMousePos(canvas, event)
+socket.on('turnSwitched', function () {
+    myTurn = !myTurn
 
-    var pixelData = c.getImageData(mousePos.x, mousePos.y, 1, 1).data
+    setTimeout(function () {
+        if (myTurn) {
+            console.log('My Turn!')
+        } else {
+            console.log('Not my turn!')
+        }
+    }, 500)
+})
+
+function hasPiece(x, y) {
+
+    for (var i = 0; i < player1Pieces.length; i++) {
+        if (Math.floor(x) == Math.floor(player1Pieces[i].x) && Math.floor(y) == Math.floor(player1Pieces[i].y)) {
+            console.log('piece there')
+            return true
+        }
+    }
+
+    for (var i = 0; i < player2Pieces.length; i++) {
+        if (Math.floor(x) == Math.floor(player2Pieces[i].x) && Math.floor(y) == Math.floor(player2Pieces[i].y)) {
+            console.log('piece there')
+            return true
+        }
+    }
+    console.log('piece not there')
+    return false;
+}
+
+function isSameColor(x, y) {
+    var pixelData = c.getImageData(x, y, 1, 1).data
     var hex = 'rgba(' + pixelData[0] + ', ' + pixelData[1] + ', ' + pixelData[2] + ', 1)'
 
-    console.log("X: " + mousePos.x + " Y:" + mousePos.y + " " + hex)
-    console.log("")
-    console.log("Circle Location")
+    if (hex == playerColor) {
+        console.log('same color')
+        return true
+    } else {
+        console.log('not same color')
+        return false
+    }
+}
 
-    var lengthOfSquare = canvas.width / numRows
+function isMovingHorizontal(selectedCircle, x, y) {
+    if (selectedCircle.x == x || selectedCircle.y == y) {
+        console.log('moving horizontal')
+        return true;
+    }
 
-    var x = ((Math.ceil(mousePos.x / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
-    console.log("X: " + x)
+    console.log('not moving horizontal')
+    return false;
+}
 
-    var y = ((Math.ceil(mousePos.y / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
-    console.log("Y: " + y)
+socket.on('deletePiece', function (data) {
+    deletePiece(data.x, data.y)
+})
 
-    if (hex == player1Color || hex == player2Color) {
-        if (!isSelected) {
-            selectPiece(x, y)
-        } else if (isSelected) {
-            // Deselects a game pieces
-            if (x == selectedCircle.x && y == selectedCircle.y) {
-                deselectPiece()
-            }
+function deletePiece(x, y) {
+    for (var i = 0; i < player1Pieces.length; i++) {
+        if (Math.floor(player1Pieces[i].x) == Math.floor(x) && Math.floor(player1Pieces[i].y) == Math.floor(y)) {
+            player1Pieces[i].x = -100
+            player1Pieces[i].y = -100
+            player1Pieces[i].isAlive = false
         }
-    /* 
-        If we have selected a piece, and where we click is not equal to player1 or player2's color, or a white square
-        or if the square that we selected is not within a certain frame
-    */
-    } else if (isSelected && hex != player1Color && hex != player2Color && hex != 'rgba(177, 177, 177, 1)') {
-        console.log('Selected X: ' + selectedCircle.x)
-        console.log('Selected Y: ' + selectedCircle.y)
+    }
 
-        for (var i = 0; i < player2Pieces.length; i++) {
-
-            var tempVarX = Math.abs(selectedCircle.x - player2Pieces[i].x)
-            var tempVarY = Math.abs(selectedCircle.y - player2Pieces[i].y)
-
-            console.log('tempVarX: ' + tempVarX)
-            console.log('tempVarY: ' + tempVarY)
-            console.log('')
-            // If we have found the piece in the collection of pieces
-            if (tempVarX < 20 && tempVarY < 20) {
-                movePiece(x, y, i, 2)
-                socket.emit('updateBoard', {
-                    player1: player1Pieces,
-                    player2: player2Pieces,
-                    dimension: canvas.width
-                })
-            }
+    for (var i = 0; i < player2Pieces.length; i++) {
+        if (Math.floor(player2Pieces[i].x) == Math.floor(x) && Math.floor(player2Pieces[i].y) == Math.floor(y)) {
+            player2Pieces[i].x = -100
+            player2Pieces[i].y = -100
+            player2Pieces[i].isAlive = false
         }
-        for (var i = 0; i < player1Pieces.length; i++) {
+    }
+}
 
-            var tempVarX = Math.abs(selectedCircle.x - player1Pieces[i].x)
-            var tempVarY = Math.abs(selectedCircle.y - player1Pieces[i].y)
+function isMovingInRightDirection(selectedCircle, x, y) {
+    // Look through player 1 pieces
+    for (var i = 0; i < player1Pieces.length; i++) {
+        var tempVarX = Math.abs(selectedCircle.x - player1Pieces[i].x)
+        var tempVarY = Math.abs(selectedCircle.y - player1Pieces[i].y)
 
-            console.log('tempVarX: ' + tempVarX)
-            console.log('tempVarY: ' + tempVarY)
-            console.log('')
+        if (Math.floor(tempVarX) == 0 && Math.floor(tempVarY) == 0) {
+            //We have found the piece
+            if (player1Pieces[i].isKing) {
+                console.log('Right direction')
+                return true
+            } else {
 
-            // If we have found the piece in the collection of pieces
-            if (tempVarX < 20 && tempVarY < 20) {
-                movePiece(x, y, i, 1)
-                socket.emit('updateBoard', {
-                    player1: player1Pieces,
-                    player2: player2Pieces,
-                    dimension: canvas.width
-                })
+                if (player1Pieces[i].direction == 'up') {
+                    if (selectedCircle.y > y) {
+                        console.log('Right direction')
+                        return true
+                    } else {
+
+                        console.log('Wrong direction')
+                        return false
+                    }
+                } else {
+                    if (selectedCircle.y < y) {
+                        console.log('Right direction')
+                        return true
+                    } else {
+                        console.log('thisone')
+                        console.log('Wrong direction')
+                        return false
+                    }
+                }
             }
         }
     }
 
+    // Look through player 2 pieces
+    for (var i = 0; i < player2Pieces.length; i++) {
+        var tempVarX = Math.abs(selectedCircle.x - player2Pieces[i].x)
+        var tempVarY = Math.abs(selectedCircle.y - player2Pieces[i].y)
+
+        if (Math.floor(tempVarX) == 0 && Math.floor(tempVarY) == 0) {
+            //We have found the piece
+            if (player2Pieces[i].isKing) {
+                return true
+            } else {
+
+                if (player2Pieces[i].direction == 'up') {
+                    console.log('We are up')
+                    if (selectedCircle.y > y) {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    if (selectedCircle.y < y) {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+        }
+    }
+    // Find piece
+    // If king, return true
+    // If else, determine if moving in right direction
+}
+
+// Event listener that displays mouse coordinates
+canvas.addEventListener('mousedown', function (event) {
+    if (myTurn) {
+
+        var mousePos = returnMousePos(canvas, event)
+
+        var pixelData = c.getImageData(mousePos.x, mousePos.y, 1, 1).data
+        var hex = 'rgba(' + pixelData[0] + ', ' + pixelData[1] + ', ' + pixelData[2] + ', 1)'
+
+        // console.log("X: " + mousePos.x + " Y:" + mousePos.y + " " + hex)
+        // console.log("")
+        // console.log("Circle Location")
+
+        var lengthOfSquare = canvas.width / numRows
+
+        var x = ((Math.ceil(mousePos.x / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
+        console.log("X: " + x)
+
+        var y = ((Math.ceil(mousePos.y / lengthOfSquare)) * lengthOfSquare) - (lengthOfSquare / 2)
+        console.log("Y: " + y)
+
+        // var isPiece = hasPiece(x, y)
+
+        // console.log('Is there piece?: ' + isPiece)
+
+        var halfwayX = (x + selectedCircle.x) / 2
+        var halfwayY = (y + selectedCircle.y) / 2
+
+        if (hex == playerColor) {
+            if (!isSelected) {
+                selectPiece(x, y)
+            } else if (isSelected) {
+                // Deselects a game pieces
+                if (x == selectedCircle.x && y == selectedCircle.y) {
+                    deselectPiece()
+                }
+            }
+            /* 
+                If we have selected a piece, and where we click is not equal to player1 or player2's color, or a white square
+                or if the square that we selected is not within a certain frame
+            */
+        } else if (isSelected && hex != playerColor && hex != 'rgba(177, 177, 177, 1)') {
+            // console.log('Selected X: ' + selectedCircle.x)
+            // console.log('Selected Y: ' + selectedCircle.y)
+
+            var pointDistance = Math.ceil(Math.sqrt(Math.pow(selectedCircle.y - y, 2) + Math.pow(selectedCircle.x - x, 2)))
+            var squareDiagonal = Math.ceil(lengthOfSquare * Math.sqrt(2))
+
+
+            if (pointDistance <= squareDiagonal) {
+
+                // Check to see if a person is already on that square first, write function. Pass x and y and return bool
+                if (!hasPiece(x, y) && !isMovingHorizontal(selectedCircle, x, y) && isMovingInRightDirection(selectedCircle, x, y)) {
+
+                    for (var i = 0; i < player2Pieces.length; i++) {
+
+                        var tempVarX = Math.floor(selectedCircle.x) - Math.floor(player2Pieces[i].x)
+                        var tempVarY = Math.floor(selectedCircle.y) - Math.floor(player2Pieces[i].y)
+                        // If we have found the piece in the collection of pieces
+                        if (tempVarX == 0 && tempVarY == 0) {
+                            movePiece(x, y, i, 2, 1)
+                            setTimeout(function () {
+                                socket.emit('updateBoardt', {
+                                    player1: player1Pieces,
+                                    player2: player2Pieces,
+                                    dimension: canvas.width
+                                })
+                            }, 500)
+
+                        }
+                    }
+                    for (var i = 0; i < player1Pieces.length; i++) {
+
+                        var tempVarX = Math.floor(selectedCircle.x) - Math.floor(player1Pieces[i].x)
+                        var tempVarY = Math.floor(selectedCircle.y) - Math.floor(player1Pieces[i].y)
+
+                        // If we have found the piece in the collection of pieces
+                        if (tempVarX == 0 && tempVarY == 0) {
+                            movePiece(x, y, i, 1, 1)
+                            setTimeout(function () {
+                                socket.emit('updateBoardt', {
+                                    player1: player1Pieces,
+                                    player2: player2Pieces,
+                                    dimension: canvas.width
+                                })
+                            }, 500)
+
+                        }
+                    }
+                }
+                // Jump over piece
+            } else if (pointDistance > squareDiagonal && pointDistance <= (2 * squareDiagonal)) {
+                // Check to see if a person is already on that square first, write function. Pass x and y and return bool
+                if (!hasPiece(x, y) && !isMovingHorizontal(selectedCircle, x, y) && isMovingInRightDirection(selectedCircle, x, y) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
+
+                    deletePiece(halfwayX, halfwayY)
+                    socket.emit('switchTurn')
+                    socket.emit('givepoint', {
+                        'playerNumber': myPlayerNumber
+                    })
+                    for (var i = 0; i < player2Pieces.length; i++) {
+
+                        var tempVarX = Math.floor(selectedCircle.x) - Math.floor(player2Pieces[i].x)
+                        var tempVarY = Math.floor(selectedCircle.y) - Math.floor(player2Pieces[i].y)
+                        // If we have found the piece in the collection of pieces
+                        if (tempVarX == 0 && tempVarY == 0) {
+                            movePiece(x, y, i, 2, 2)
+                            setTimeout(function () {
+                                socket.emit('updateBoardt', {
+                                    player1: player1Pieces,
+                                    player2: player2Pieces,
+                                    dimension: canvas.width
+                                })
+                            }, 500)
+
+                        }
+                    }
+                    for (var i = 0; i < player1Pieces.length; i++) {
+
+                        var tempVarX = Math.floor(selectedCircle.x) - Math.floor(player1Pieces[i].x)
+                        var tempVarY = Math.floor(selectedCircle.y) - Math.floor(player1Pieces[i].y)
+
+                        // If we have found the piece in the collection of pieces
+                        if (tempVarX == 0 && tempVarY == 0) {
+                            movePiece(x, y, i, 1, 2)
+                            setTimeout(function () {
+                                socket.emit('updateBoardt', {
+                                    player1: player1Pieces,
+                                    player2: player2Pieces,
+                                    dimension: canvas.width
+                                })
+                            }, 500)
+
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 })
 
-socket.on('getouttahere', function() {
+socket.on('getouttahere', function () {
     alert('Multiplayer lobby is full. To view this game as a spectator, type in the link you took you to this page + /spectator')
 })
 
@@ -190,8 +448,7 @@ socket.on('updateBoard', function (data) {
 // Variables to modify canvas properties
 var isWhite = false;
 var numRows = 9
-var player1Color = 'rgba(66, 134, 244, 1)'
-var player2Color = 'rgba(66, 244, 98, 1)'
+
 
 var checkersPiece = {
     x: (canvas.width / 10) / 2,
@@ -212,21 +469,27 @@ player1Pieces = [
         y: (canvas.width / numRows) / 2,
         color: player1Color,
         isKing: false,
-        isAlive: true
+        isAlive: true,
+        direction: 'down', 
+        position: 0
     },
     {
         x: (canvas.width / numRows) / 2,
         y: (canvas.width / numRows) / 2 + (canvas.width / numRows),
         color: player1Color,
         isKing: false,
-        isAlive: true
+        isAlive: true,
+        direction: 'down', 
+        position: canvas.width / numRows
     },
     {
         x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
         y: (canvas.width / numRows) / 2 + 2 * (canvas.width / numRows),
         color: player1Color,
         isKing: false,
-        isAlive: true
+        isAlive: true,
+        direction: 'down', 
+        position: (canvas.width / numRows) * 2
     }
 ]
 
@@ -238,21 +501,27 @@ if (numRows % 2 == 0) {
             y: (canvas.width / numRows) / 2 + (canvas.width - 3 * (canvas.width / numRows)),
             color: player2Color,
             isKing: false,
-            isAlive: true
+            isAlive: true,
+            direction: 'up', 
+            position: 0
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
             y: (canvas.width / numRows) / 2 + (canvas.width - 2 * (canvas.width / numRows)),
             color: player2Color,
             isKing: false,
-            isAlive: true
+            isAlive: true,
+            direction: 'up', 
+            position: canvas.width / numRows
         },
         {
             x: (canvas.width / numRows) / 2,
             y: (canvas.width / numRows) / 2 + (canvas.width - (canvas.width / numRows)),
             color: player2Color,
             isKing: false,
-            isAlive: true
+            isAlive: true,
+            direction: 'up', 
+            position: (canvas.width / numRows) * 2
         }
     ]
 } else {
@@ -262,21 +531,27 @@ if (numRows % 2 == 0) {
             y: (canvas.width / numRows) / 2 + (canvas.width - 3 * (canvas.width / numRows)),
             color: player2Color,
             isKing: false,
-            isAlive: true
+            isAlive: true,
+            direction: 'up', 
+            position: 0
         },
         {
             x: (canvas.width / numRows) / 2,
             y: (canvas.width / numRows) / 2 + (canvas.width - 2 * (canvas.width / numRows)),
             color: player2Color,
             isKing: false,
-            isAlive: true
+            isAlive: true,
+            direction: 'up', 
+            position: canvas.width / numRows
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
             y: (canvas.width / numRows) / 2 + (canvas.width - (canvas.width / numRows)),
             color: player2Color,
             isKing: false,
-            isAlive: true
+            isAlive: true,
+            direction: 'up', 
+            position: (canvas.width / numRows) * 2
         }
     ]
 }
@@ -294,7 +569,9 @@ function calculatePieces(pieces) {
                 y: pieces[i].y,
                 color: pieces[i].color,
                 isKing: false,
-                isAlive: true
+                isAlive: true,
+                direction: pieces[i].direction, 
+                position: pieces[i].position
             })
         }
     }
@@ -303,14 +580,17 @@ function calculatePieces(pieces) {
 calculatePieces(player1Pieces)
 calculatePieces(player2Pieces)
 
+// Only draw pieces that are alive
 function drawPieces(pieces) {
     console.log(pieces.length)
     for (var i = 0; i < pieces.length; i++) {
-        c.beginPath()
-        c.arc(pieces[i].x, pieces[i].y, 10, Math.PI * 2, false)
-        c.fillStyle = pieces[i].color;
-        c.fill();
-        c.stroke()
+        if (pieces[i].isAlive) {
+            c.beginPath()
+            c.arc(pieces[i].x, pieces[i].y, 10, Math.PI * 2, false)
+            c.fillStyle = pieces[i].color;
+            c.fill();
+            c.stroke()
+        }
     }
 }
 

@@ -1,6 +1,15 @@
 // Establish connection to server on port 5000
 // var socket = io.connect('http://localhost:5000')
-var socket = io('http://192.168.0.4:5000', { query: 'person=spectator' })
+
+var socket = io('https://centipedecheckers.ngrok.io', { 
+    query: 'person=spectator' 
+})
+
+socket.connect()
+
+socket.on('disconnected', function() {
+    alert('Player has disconnected from the server')
+})
 
 /*
     If we are in production, use the IP address of the server
