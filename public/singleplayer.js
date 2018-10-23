@@ -9,6 +9,9 @@ if (window.innerHeight < window.innerWidth) {
     canvas.height = window.innerWidth / 1.2
 }
 
+myPoints = 0
+AIPoints = 0
+
 var myTurn = true
 var myPlayerNumber
 
@@ -63,6 +66,8 @@ function deselectPiece() {
     c.strokeStyle = 'rgba(20, 20, 20, 1)'
     animate()
 }
+
+var AISet = new Set()
 
 function AITurn() {
     console.log('AI Turn')
@@ -122,23 +127,28 @@ function tryToMove(index, numSpaces) {
                 movePiece(currentX, currentY, index, 2, 1)
                 animate()
             } else {
-                AITurn()
+                setTimeout(function () {
+                    AITurn()
+                }, 60)
             }
 
         } else {
             // We try to move two spaces
-            if (currentX < canvas.width && currentY < canvas.width && !hasPiece(currentX, currentY) && !isMovingHorizontal(selectedCircle, currentX, currentY) && isMovingInRightDirection(selectedCircle, currentX, currentY) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
+            if (currentX < canvas.width && currentX >= 30 && currentY < canvas.width && currentY >= 30 && !hasPiece(currentX, currentY) && !isMovingHorizontal(selectedCircle, currentX, currentY) && isMovingInRightDirection(selectedCircle, currentX, currentY) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
                 movePiece(currentX, currentY, index, 2, 2)
                 deletePiece(halfwayX, halfwayY)
                 animate()
             } else {
-                AITurn()
+                setTimeout(function () {
+                    AITurn()
+                }, 60)
             }
         }
     }, 70)
 }
 
 function movePiece(x, y, i, playerNumber, multiply) {
+    var lengthOfSquare = canvas.width / numRows
     if (playerNumber == '1') {
         player1Pieces[i].x = x
         player1Pieces[i].y = y
@@ -157,11 +167,76 @@ function movePiece(x, y, i, playerNumber, multiply) {
 
         setTimeout(function () {
             if (player2Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
-                player2pieces[i].isKing = true
+                player2Pieces[i].isKing = true
             }
         }, 500)
 
     }
+
+    console.log('We moved a piece to ' + x + ' -- ' + y)
+
+
+    // if (multiply == 2) {
+
+    //     if (!hasPiece(x + (lengthOfSquare * 2), y + (lengthOfSquare * 2)) && hasPiece(x + lengthOfSquare, y + lengthOfSquare) && !isSameColor(x + lengthOfSquare, y + lengthOfSquare)) {
+    //         movePiece(x + (lengthOfSquare * 2), y + (lengthOfSquare * 2), i, playerNumber, 2)
+    //         deletePiece(x + lengthOfSquare, y + lengthOfSquare)
+    //         console.log('Here number 1')
+    //     } else if (!hasPiece(x + (lengthOfSquare * 2), y - (lengthOfSquare * 2)) && hasPiece(x + lengthOfSquare, y - lengthOfSquare) && !isSameColor(x + lengthOfSquare, y + lengthOfSquare)) {
+    //         movePiece(x + (lengthOfSquare * 2), y - (lengthOfSquare * 2), i, playerNumber, 2)
+    //         deletePiece(x + lengthOfSquare, y - lengthOfSquare)
+    //         console.log('Here number 2')
+    //     } else if (!hasPiece(x - (lengthOfSquare * 2), y + (lengthOfSquare * 2)) && hasPiece(x - lengthOfSquare, y + lengthOfSquare) && !isSameColor(x - lengthOfSquare, y + lengthOfSquare)) {
+    //         movePiece(x - (lengthOfSquare * 2), y + (lengthOfSquare * 2), i, playerNumber, 2)
+    //         deletePiece(x - lengthOfSquare, y + lengthOfSquare)
+    //         console.log('Here number 3')
+    //     } else if (!hasPiece(x - (lengthOfSquare * 2), y - (lengthOfSquare * 2)) && hasPiece(x - lengthOfSquare, y - lengthOfSquare) && !isSameColor(x - lengthOfSquare, y - lengthOfSquare)) {
+    //         movePiece(x - (lengthOfSquare * 2), y - (lengthOfSquare * 2), i, playerNumber, 2)
+    //         deletePiece(x - lengthOfSquare, y - lengthOfSquare)
+    //         console.log('Here number 4')
+    //     } else {
+    //         console.log('Checked but no where else to jump')
+    //         isSelected = false
+    //         selectedCircle.x = ""
+    //         selectedCircle.y = ""
+    //         c.strokeStyle = 'rgba(20, 20, 20, 1)'
+
+    //         if (myTurn) {
+    //             console.log('It is DEFINITELY not my turn')
+    //             myTurn = false
+    //             console.log('Not my turn')
+    //             playerColor = 'rgba(66, 244, 98, 1)'
+    //             setTimeout(function () {
+    //                 AITurn()
+    //             }, 50)
+    //         } else {
+    //             playerColor = 'rgba(66, 134, 244, 1)'
+    //             myTurn = true
+    //         }
+
+    //         animate()
+    //     }
+    // } else {
+    //     isSelected = false
+    //     selectedCircle.x = ""
+    //     selectedCircle.y = ""
+    //     c.strokeStyle = 'rgba(20, 20, 20, 1)'
+
+    //     if (myTurn) {
+    //         myTurn = false
+    //         console.log('Not my turn')
+    //         playerColor = 'rgba(66, 244, 98, 1)'
+    //         setTimeout(function () {
+    //             AITurn()
+    //         }, 50)
+    //     } else {
+    //         playerColor = 'rgba(66, 134, 244, 1)'
+    //         myTurn = true
+    //     }
+
+    //     animate()
+    // }
+
 
     isSelected = false
     selectedCircle.x = ""
@@ -172,15 +247,15 @@ function movePiece(x, y, i, playerNumber, multiply) {
         myTurn = false
         console.log('Not my turn')
         playerColor = 'rgba(66, 244, 98, 1)'
-        setTimeout(function() {
+        setTimeout(function () {
             AITurn()
-        }, 50)
+        }, 60)
     } else {
         playerColor = 'rgba(66, 134, 244, 1)'
         myTurn = true
     }
-    animate()
 
+    animate()
 
 }
 
@@ -398,8 +473,20 @@ canvas.addEventListener('mousedown', function (event) {
                 // Check to see if a person is already on that square first, write function. Pass x and y and return bool
                 if (!hasPiece(x, y) && !isMovingHorizontal(selectedCircle, x, y) && isMovingInRightDirection(selectedCircle, x, y) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
 
+                    if (myTurn) {
+                        myPoints++
+                    } else if (!myTurn) {
+                        AIPoints++
+                    }
+
+                    if (myPoints >= 13) {
+                        alert('You have won the match!')
+
+                    } else if (AIPoints >= 13) {
+                        alert('You have lost the match!')
+
+                    }
                     deletePiece(halfwayX, halfwayY)
-                    myTurn = false
                     for (var i = 0; i < player2Pieces.length; i++) {
 
                         var tempVarX = Math.floor(selectedCircle.x) - Math.floor(player2Pieces[i].x)
@@ -462,7 +549,7 @@ player1Pieces = [
         x: (canvas.width / numRows) / 2,
         y: (canvas.width / numRows) / 2 + (canvas.width / numRows),
         color: player1Color,
-        isKing: false,
+        isKing: true,
         isAlive: true,
         direction: 'down',
         position: canvas.width / numRows
@@ -569,12 +656,32 @@ calculatePieces(player2Pieces)
 function drawPieces(pieces) {
     console.log(pieces.length)
     for (var i = 0; i < pieces.length; i++) {
-        if (pieces[i].isAlive) {
+        if (pieces[i].isAlive && !pieces[i].isKing) {
             c.beginPath()
             c.arc(pieces[i].x, pieces[i].y, 10, Math.PI * 2, false)
             c.fillStyle = pieces[i].color;
             c.fill();
             c.stroke()
+        } else if (pieces[i].isAlive && pieces[i].isKing) {
+
+            console.log('This pice is a king!')
+            var oldFillStyle = c.fillStyle
+
+            c.beginPath()
+            c.arc(pieces[i].x, pieces[i].y, 10, Math.PI * 2, false)
+            c.fillStyle = pieces[i].color;
+            c.fill()
+            c.stroke()
+
+            console.log('Here')
+            c.beginPath()
+            c.arc(pieces[i].x, pieces[i].y, 1, Math.PI * 2, false)
+            //c.fillStyle = pieces[i].color;
+            c.fill()
+            c.stroke()
+            c.fillStyle = oldFillStyle
+
+
         }
     }
 }
