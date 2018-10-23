@@ -3,6 +3,8 @@ var socket = io('https://centipedecheckers.ngrok.io', { query: 'person=player' }
 // var socket = io('http://localhost:5000', { query: 'person=player' })
 socket.connect()
 
+var myPoints = 0
+
 /*
     If we are in production, use the IP address of the server
     to access from a phone
@@ -281,6 +283,10 @@ function isMovingInRightDirection(selectedCircle, x, y) {
     // If else, determine if moving in right direction
 }
 
+socket.on('loser', function() {
+    alert('You have lost the game')
+})
+
 // Event listener that displays mouse coordinates
 canvas.addEventListener('mousedown', function (event) {
     if (myTurn) {
@@ -375,6 +381,13 @@ canvas.addEventListener('mousedown', function (event) {
             } else if (pointDistance > squareDiagonal && pointDistance <= (2 * squareDiagonal)) {
                 // Check to see if a person is already on that square first, write function. Pass x and y and return bool
                 if (!hasPiece(x, y) && !isMovingHorizontal(selectedCircle, x, y) && isMovingInRightDirection(selectedCircle, x, y) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
+
+                    myPoints++
+
+                    if(myPoints >= 13) {
+                        socket.emit('you-lost')
+                        alert('You have won the game!')
+                    }
 
                     deletePiece(halfwayX, halfwayY)
                     socket.emit('switchTurn')

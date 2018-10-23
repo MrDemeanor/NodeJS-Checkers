@@ -126,6 +126,10 @@ io.on('connection', function (socket) {
         spectatorSocket.add(socket.id)
     }
 
+    socket.on('you-lost', function() {
+        io.sockets.emit('loser')
+    })
+
     // Updates the board 
     socket.on('updateBoardt', function (data) {
         io.sockets.emit('updateBoard', data)
