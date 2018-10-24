@@ -1,5 +1,8 @@
-var accountSid = 'AC3621ee1a22d6b4bc8b9c587966774c34'; // Your Account SID from www.twilio.com/console
-var authToken = '86a50c71996b16cbd5f8b26e031e1a59';   // Your Auth Token from www.twilio.com/console
+// Your Account SID from www.twilio.com/console
+var accountSid = 'AC3621ee1a22d6b4bc8b9c587966774c34'
+
+// Your Auth Token from www.twilio.com/console
+var authToken = '86a50c71996b16cbd5f8b26e031e1a59'
 
 var client = require('twilio')(accountSid, authToken);
 
@@ -26,6 +29,7 @@ Twilio.prototype.subscribe = function (number) {
     })
         .then((message) => console.log(message.sid))
     
+    // We are returning a value for the purposes of our test script. Making sure number is the right format
     return '+1' + number
 
 }
