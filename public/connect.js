@@ -1,15 +1,10 @@
-// Establish connection to server on port 5000
+// Establish connection to server
 var socket = io('https://centipedecheckers.ngrok.io', { query: 'person=player' })
-// var socket = io('http://localhost:5000', { query: 'person=player' })
 socket.connect()
 
 var myPoints = 0
-
-/*
-    If we are in production, use the IP address of the server
-    to access from a phone
-*/
-// var socket = io.connect('http://192.168.6.93:5000')
+var myTurn
+var myPlayerNumber
 
 // Set the size of the canvas based on the screen resolution
 var canvas = document.getElementById('gamecanvas')
@@ -22,14 +17,12 @@ if (window.innerHeight < window.innerWidth) {
     canvas.height = window.innerWidth / 1.2
 }
 
+// Tells our server who were are so that it can place us in the correct category
 socket.on('who-are-you', function () {
     socket.emit('i-am-...', {
         me: 'player'
     })
 })
-
-var myTurn
-var myPlayerNumber
 
 socket.on('gameover', function() {
     alert('The game has ended!')
