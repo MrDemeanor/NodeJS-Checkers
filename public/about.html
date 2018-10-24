@@ -45,9 +45,43 @@
             </ul>
         </div>
     </nav>
-    <canvas id="gamecanvas"></canvas>
 
-    <script src="spectator.js"></script>
+    <div class="jumbotron">
+        <h1 class="display-4 text-center">About Us</h1>
+        <p class="lead text-center">We are a group of 5 software developers (Brent, Jacob, Rogelio, Adrienne, and
+            Cynthia)
+            currently enrolled in Jason Diaz's CS 3398 Software Engineering class. Our team is called the Centipede
+            Army, hence
+            the Centipede logo on the front page
+        </p>
+        <hr class="my-4">
+        <p class="lead text-center">
+                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#bitcoin-modal">Make a Bitcoin donation :)</button>
+        </p>
+    </div>
+
+    <!-- Bitcoin Modal -->
+    <div class="modal fade" id="bitcoin-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Just kidding no Bitcoin for us :(</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
+
+<!-- Import Bootstrap Javascript -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
 
 </html>

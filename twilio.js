@@ -24,7 +24,8 @@ Twilio.prototype.subscribe = function (number) {
         to: '+1' + number,  // Text this number
         from: '+19403995485' // From a valid Twilio number
     })
-        .then((message) => console.log(message.sid));
+        .then((message) => console.log(message.sid))
+
 }
 
 /*
@@ -39,6 +40,7 @@ Twilio.prototype.unsubscribe = function (number) {
         from: '+19403995485' // From a valid Twilio number
     })
         .then((message) => console.log(message.sid));
+    
 }
 
 /*

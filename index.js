@@ -33,6 +33,10 @@ app.get('/singleplayer', function(req, res) {
     res.sendFile(path.join(__dirname + '/public/singleplayer.html'))
 })
 
+app.get('/about', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/about.html'))
+})
+
 app.get('/multiplayer/', function (req, res) {
 
     res.sendFile(path.join(__dirname + '/public/multiplayer.html'))
@@ -77,7 +81,6 @@ app.get('/unsubscribe/myNumber', function(req, res) {
     Twilio.unsubscribe(number)
 
 })
-
 
 
 /*
@@ -198,8 +201,39 @@ var p2 = [boardSize + Math.floor(boardSize / 2)][5]
 app.use('/api', router)
 
 // API access at http://localhost:5000/api
-router.get('/', function (req, res) {
+router.get('/multiplayer_size', function (req, res) {
     res.json({
-        message: 'This API is working!'
+        multiplayer_size: playerSocket.size
+    })
+})
+
+router.get('/get_server', function(req, res) {
+    res.json({
+        server: server
+    })
+})
+
+router.get('/add_number', function(req, res) {
+    res.json({
+        myClient: Twilio.subscribe('5127495923')
+    })
+})
+
+router.get('/test_socket_emptiness', function(req, res) {
+    res.json({
+        players: playerSocket.size, 
+        spectators: spectatorSocket.size
+    })
+})
+
+router.get('/remove_number', function(req, res) {
+    res.json({
+        myClient: Twilio.subscribe('5127495923')
+    })
+})
+
+router.get('/check_io', function(req, res) {
+    res.json({
+        io: io
     })
 })
