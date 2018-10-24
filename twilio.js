@@ -25,6 +25,8 @@ Twilio.prototype.subscribe = function (number) {
         from: '+19403995485' // From a valid Twilio number
     })
         .then((message) => console.log(message.sid))
+    
+    return '+1' + number
 
 }
 

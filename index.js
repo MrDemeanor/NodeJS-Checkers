@@ -3,7 +3,6 @@ var express = require('express')
 var socket = require('socket.io')
 var bodyParser = require('body-parser')
 var path = require('path')
-
 require('./twilio')
 
 // Create Express app
@@ -21,9 +20,7 @@ var server = app.listen(5000, function () {
     console.log('Listening on port 5000')
 })
 
-app.get('/spectator', function (req, res) {
-    res.sendFile(path.join(__dirname + '/public/spectator.html'));
-});
+// These are our routes
 
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/home.html'))
@@ -31,10 +28,6 @@ app.get('/', function (req, res) {
 
 app.get('/singleplayer', function(req, res) {
     res.sendFile(path.join(__dirname + '/public/singleplayer.html'))
-})
-
-app.get('/about', function(req, res) {
-    res.sendFile(path.join(__dirname + '/public/about.html'))
 })
 
 app.get('/multiplayer/', function (req, res) {
@@ -50,6 +43,14 @@ app.get('/multiplayer/', function (req, res) {
             player2 = username
         }
     }, 2000)
+})
+
+app.get('/spectator', function (req, res) {
+    res.sendFile(path.join(__dirname + '/public/spectator.html'));
+})
+
+app.get('/about', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/about.html'))
 })
 
 app.get('/subscribe', function (req, res) {
@@ -102,8 +103,11 @@ io.on('connection', function (socket) {
     // Let's us know that a connection has been established
     console.log('Connection made!')
 
+    // Information fed to socket upon connection
     var handshakeData = socket.request;
 
+    // Determine who is trying to connect and place them accordingly
+    //      Are you a player, or a spectator?   
     if (handshakeData._query['person'] == 'player') {
         if (playerSocket.size >= 2) {
             console.log('Too Big')
@@ -129,6 +133,7 @@ io.on('connection', function (socket) {
         spectatorSocket.add(socket.id)
     }
 
+    // Sends a message to the loser in a match
     socket.on('you-lost', function() {
         io.sockets.emit('loser')
     })
@@ -138,10 +143,12 @@ io.on('connection', function (socket) {
         io.sockets.emit('updateBoard', data)
     })
 
+    // Switches the turn of each player
     socket.on('switchTurn', function () {
         io.sockets.emit('turnSwitched')
     })
 
+    // Allows both players to see that a piece has been delted
     socket.on('delete', function (data) {
         io.sockets.emit('deletePiece', {
             x: data.x,
@@ -149,8 +156,10 @@ io.on('connection', function (socket) {
         })
     })
 
+    // These are the things that happen when someone disconnects from a multiplayer game
     socket.on('disconnect', function () {
 
+        // If you are a player and disconnect, sockets will be notified
         if (handshakeData._query['person'] != 'spectator') {
             io.sockets.emit('disconnected')
             player1 = null
@@ -164,6 +173,7 @@ io.on('connection', function (socket) {
 
     })
 
+    // Determines who will receive a point
     socket.on('givepoint', function(data) {
         if(data.playerNumber == '1') {
             player1Score++
@@ -193,20 +203,10 @@ var router = express.Router()
 // Size will be determiend by another page
 var boardSize = 10
 
-// 2D array of player pieces. Each piece has a color, x and y coordinate, a king status and an alive status
-var p1 = [boardSize + Math.floor(boardSize / 2)][5]
-var p2 = [boardSize + Math.floor(boardSize / 2)][5]
-
 // Makes all of our APIs prefix with /api
 app.use('/api', router)
 
-// API access at http://localhost:5000/api
-router.get('/multiplayer_size', function (req, res) {
-    res.json({
-        multiplayer_size: playerSocket.size
-    })
-})
-
+// Retrieves the server for parsing and passes into JSON
 router.get('/get_server', function(req, res) {
     res.json({
         server: server
@@ -215,7 +215,7 @@ router.get('/get_server', function(req, res) {
 
 router.get('/add_number', function(req, res) {
     res.json({
-        myClient: Twilio.subscribe('5127495923')
+        myNumber: Twilio.subscribe('5127495923')
     })
 })
 
@@ -223,17 +223,5 @@ router.get('/test_socket_emptiness', function(req, res) {
     res.json({
         players: playerSocket.size, 
         spectators: spectatorSocket.size
-    })
-})
-
-router.get('/remove_number', function(req, res) {
-    res.json({
-        myClient: Twilio.subscribe('5127495923')
-    })
-})
-
-router.get('/check_io', function(req, res) {
-    res.json({
-        io: io
     })
 })
