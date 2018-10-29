@@ -24,7 +24,7 @@ socket.on('who-are-you', function () {
     })
 })
 
-socket.on('gameover', function() {
+socket.on('gameover', function () {
     alert('The game has ended!')
     window.location.replace("http://centipedecheckers.ngrok.io");
 })
@@ -100,25 +100,25 @@ function movePiece(x, y, i, playerNumber, multiply) {
     if (playerNumber == '1') {
         player1Pieces[i].x = x
         player1Pieces[i].y = y
-        player1Pieces[i].position += (canvas.width / numRows) * multiply
+        player1Pieces[i].position += (1 * multiply)
 
-        setTimeout(function() {
-            if(player1Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
+        setTimeout(function () {
+            if (player1Pieces[i].position >= 9) {
                 player1Pieces[i].isKing = true
             }
         }, 500)
-        
+
     } else {
         player2Pieces[i].x = x
         player2Pieces[i].y = y
-        player2Pieces[i].position += (canvas.width / numRows) * multiply
+        player2Pieces[i].position += (1 * multiply)
 
-        setTimeout(function() {
-            if(player2Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
+        setTimeout(function () {
+            if (player2Pieces[i].position >= 9) {
                 player2pieces[i].isKing = true
             }
         }, 500)
-        
+
     }
 
     isSelected = false
@@ -146,14 +146,16 @@ socket.on('turnSwitched', function () {
 function hasPiece(x, y) {
 
     for (var i = 0; i < player1Pieces.length; i++) {
-        if (Math.floor(x) == Math.floor(player1Pieces[i].x) && Math.floor(y) == Math.floor(player1Pieces[i].y)) {
+        if ((Math.floor(x) == Math.floor(player1Pieces[i].x) || Math.ceil(x) == Math.ceil(player1Pieces[i].x)) &&
+            (Math.floor(y) == Math.floor(player1Pieces[i].y) || Math.ceil(y) == Math.ceil(player1Pieces[i].y))) {
             console.log('piece there')
             return true
         }
     }
 
     for (var i = 0; i < player2Pieces.length; i++) {
-        if (Math.floor(x) == Math.floor(player2Pieces[i].x) && Math.floor(y) == Math.floor(player2Pieces[i].y)) {
+        if ((Math.floor(x) == Math.floor(player2Pieces[i].x) || Math.ceil(x) == Math.ceil(player2Pieces[i].x)) &&
+            (Math.floor(y) == Math.floor(player2Pieces[i].y) || Math.ceil(y) == Math.ceil(player2Pieces[i].y))) {
             console.log('piece there')
             return true
         }
@@ -191,7 +193,8 @@ socket.on('deletePiece', function (data) {
 
 function deletePiece(x, y) {
     for (var i = 0; i < player1Pieces.length; i++) {
-        if (Math.floor(player1Pieces[i].x) == Math.floor(x) && Math.floor(player1Pieces[i].y) == Math.floor(y)) {
+        if ((Math.floor(player1Pieces[i].x) == Math.floor(x) || Math.ceil(player1Pieces[i].x) == Math.ceil(x)) &&
+            (Math.floor(player1Pieces[i].y) == Math.floor(y) || Math.ceil(player1Pieces[i].y) == Math.ceil(y))) {
             player1Pieces[i].x = -100
             player1Pieces[i].y = -100
             player1Pieces[i].isAlive = false
@@ -199,7 +202,8 @@ function deletePiece(x, y) {
     }
 
     for (var i = 0; i < player2Pieces.length; i++) {
-        if (Math.floor(player2Pieces[i].x) == Math.floor(x) && Math.floor(player2Pieces[i].y) == Math.floor(y)) {
+        if ((Math.floor(x) == Math.floor(player2Pieces[i].x) || Math.ceil(x) == Math.ceil(player2Pieces[i].x)) &&
+            (Math.floor(y) == Math.floor(player2Pieces[i].y) || Math.ceil(y) == Math.ceil(player2Pieces[i].y))) {
             player2Pieces[i].x = -100
             player2Pieces[i].y = -100
             player2Pieces[i].isAlive = false
@@ -276,7 +280,7 @@ function isMovingInRightDirection(selectedCircle, x, y) {
     // If else, determine if moving in right direction
 }
 
-socket.on('loser', function() {
+socket.on('loser', function () {
     alert('You have lost the game')
 })
 
@@ -377,13 +381,13 @@ canvas.addEventListener('mousedown', function (event) {
 
                     myPoints++
 
-                    if(myPoints >= 13) {
+                    if (myPoints >= 13) {
                         socket.emit('you-lost')
                         alert('You have won the game!')
                     }
-                    
+
                     deletePiece(halfwayX, halfwayY)
-                    socket.emit('switchTurn')
+                    // socket.emit('switchTurn')
                     socket.emit('givepoint', {
                         'playerNumber': myPlayerNumber
                     })
@@ -476,8 +480,8 @@ player1Pieces = [
         color: player1Color,
         isKing: false,
         isAlive: true,
-        direction: 'down', 
-        position: 0
+        direction: 'down',
+        position: 1
     },
     {
         x: (canvas.width / numRows) / 2,
@@ -485,8 +489,8 @@ player1Pieces = [
         color: player1Color,
         isKing: false,
         isAlive: true,
-        direction: 'down', 
-        position: canvas.width / numRows
+        direction: 'down',
+        position: 2
     },
     {
         x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -494,8 +498,8 @@ player1Pieces = [
         color: player1Color,
         isKing: false,
         isAlive: true,
-        direction: 'down', 
-        position: (canvas.width / numRows) * 2
+        direction: 'down',
+        position: 3
     }
 ]
 
@@ -508,8 +512,8 @@ if (numRows % 2 == 0) {
             color: player2Color,
             isKing: false,
             isAlive: true,
-            direction: 'up', 
-            position: 0
+            direction: 'up',
+            position: 3
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -517,8 +521,8 @@ if (numRows % 2 == 0) {
             color: player2Color,
             isKing: false,
             isAlive: true,
-            direction: 'up', 
-            position: canvas.width / numRows
+            direction: 'up',
+            position: 2
         },
         {
             x: (canvas.width / numRows) / 2,
@@ -526,8 +530,8 @@ if (numRows % 2 == 0) {
             color: player2Color,
             isKing: false,
             isAlive: true,
-            direction: 'up', 
-            position: (canvas.width / numRows) * 2
+            direction: 'up',
+            position: 1
         }
     ]
 } else {
@@ -538,8 +542,8 @@ if (numRows % 2 == 0) {
             color: player2Color,
             isKing: false,
             isAlive: true,
-            direction: 'up', 
-            position: 0
+            direction: 'up',
+            position: 3
         },
         {
             x: (canvas.width / numRows) / 2,
@@ -547,8 +551,8 @@ if (numRows % 2 == 0) {
             color: player2Color,
             isKing: false,
             isAlive: true,
-            direction: 'up', 
-            position: canvas.width / numRows
+            direction: 'up',
+            position: 2
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -556,8 +560,8 @@ if (numRows % 2 == 0) {
             color: player2Color,
             isKing: false,
             isAlive: true,
-            direction: 'up', 
-            position: (canvas.width / numRows) * 2
+            direction: 'up',
+            position: 1
         }
     ]
 }
@@ -576,7 +580,7 @@ function calculatePieces(pieces) {
                 color: pieces[i].color,
                 isKing: false,
                 isAlive: true,
-                direction: pieces[i].direction, 
+                direction: pieces[i].direction,
                 position: pieces[i].position
             })
         }
@@ -590,12 +594,32 @@ calculatePieces(player2Pieces)
 function drawPieces(pieces) {
     console.log(pieces.length)
     for (var i = 0; i < pieces.length; i++) {
-        if (pieces[i].isAlive) {
+        if (pieces[i].isAlive && !pieces[i].isKing) {
             c.beginPath()
             c.arc(pieces[i].x, pieces[i].y, 10, Math.PI * 2, false)
             c.fillStyle = pieces[i].color;
             c.fill();
             c.stroke()
+        } else if (pieces[i].isAlive && pieces[i].isKing) {
+            var oldFillStyle = c.fillStyle
+
+            c.beginPath()
+            c.arc(pieces[i].x, pieces[i].y, 10, Math.PI * 2, false)
+            c.fillStyle = pieces[i].color;
+            c.fill()
+            c.stroke()
+
+            c.strokeStyle = '#cc8ee5'
+            c.beginPath()
+            c.arc(pieces[i].x, pieces[i].y, 12, Math.PI * 2, false)
+            //c.fillStyle = pieces[i].color;
+            c.fill()
+            c.stroke()
+            c.fillStyle = oldFillStyle
+
+            c.strokeStyle = '#000000'
+
+
         }
     }
 }

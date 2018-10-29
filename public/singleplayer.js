@@ -154,7 +154,6 @@ function tryToMove(index, numSpaces) {
 }
 
 function movePiece(x, y, i, playerNumber, multiply) {
-    var lengthOfSquare = canvas.width / numRows
     if (playerNumber == '1') {
         player1Pieces[i].x = x
         player1Pieces[i].y = y
@@ -528,7 +527,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: 1
+            position: 3
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -546,7 +545,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: 3
+            position: 1
         }
     ]
 } else {
