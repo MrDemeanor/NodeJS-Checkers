@@ -21,6 +21,7 @@ class UnitTest(unittest.TestCase):
         ip = socket.gethostbyname('centipedecheckers.ngrok.io')
         self.assertIsNotNone(ip)
 
+    # Checks to see if the number is getting formatted correctly
     def test_number_formatting(self):
         r = requests.get('http://centipedecheckers.ngrok.io/api/add_number')
         self.assertEqual(r.json()['myNumber'], '+15127495923')

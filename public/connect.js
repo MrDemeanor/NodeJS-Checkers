@@ -381,7 +381,7 @@ canvas.addEventListener('mousedown', function (event) {
                         socket.emit('you-lost')
                         alert('You have won the game!')
                     }
-
+                    
                     deletePiece(halfwayX, halfwayY)
                     socket.emit('switchTurn')
                     socket.emit('givepoint', {

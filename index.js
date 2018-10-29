@@ -45,6 +45,10 @@ app.get('/multiplayer/', function (req, res) {
     }, 2000)
 })
 
+app.get('/test_board', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/test_board.html'))
+})
+
 app.get('/spectator', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/spectator.html'));
 })

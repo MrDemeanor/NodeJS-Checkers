@@ -123,7 +123,7 @@ function tryToMove(index, numSpaces) {
     setTimeout(function () {
         if (numSpaces == 1) {
             // We try to move one spaces
-            if (currentX < canvas.width && currentX >= (canvas.width / numRows) && currentY >= (canvas.width / numRows) && currentY < canvas.width && !hasPiece(currentX, currentY) && !isMovingHorizontal(selectedCircle, currentX, currentY) && isMovingInRightDirection(selectedCircle, currentX, currentY)) {
+            if (currentX < canvas.width && currentX >= 30 && currentY < canvas.width && currentY >= 30 && !hasPiece(currentX, currentY) && !isMovingHorizontal(selectedCircle, currentX, currentY) && isMovingInRightDirection(selectedCircle, currentX, currentY)) {
                 movePiece(currentX, currentY, index, 2, 1)
                 animate()
             } else {
@@ -137,6 +137,12 @@ function tryToMove(index, numSpaces) {
             if (currentX < canvas.width && currentX >= 30 && currentY < canvas.width && currentY >= 30 && !hasPiece(currentX, currentY) && !isMovingHorizontal(selectedCircle, currentX, currentY) && isMovingInRightDirection(selectedCircle, currentX, currentY) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
                 movePiece(currentX, currentY, index, 2, 2)
                 deletePiece(halfwayX, halfwayY)
+                AIPoints++
+                if (AIPoints >= 13) {
+                    alert('You have lost the match!')
+
+                }
+
                 animate()
             } else {
                 setTimeout(function () {
@@ -152,10 +158,10 @@ function movePiece(x, y, i, playerNumber, multiply) {
     if (playerNumber == '1') {
         player1Pieces[i].x = x
         player1Pieces[i].y = y
-        player1Pieces[i].position += (canvas.width / numRows) * multiply
+        player1Pieces[i].position += (1 * multiply)
 
         setTimeout(function () {
-            if (player1Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
+            if (player1Pieces[i].position >= 9) {
                 player1Pieces[i].isKing = true
             }
         }, 500)
@@ -163,80 +169,17 @@ function movePiece(x, y, i, playerNumber, multiply) {
     } else {
         player2Pieces[i].x = x
         player2Pieces[i].y = y
-        player2Pieces[i].position += (canvas.width / numRows) * multiply
+        player2Pieces[i].position += (1 * multiply)
 
         setTimeout(function () {
-            if (player2Pieces[i].position >= (canvas.width / numRows) * (numRows - 1)) {
+            if (player2Pieces[i].position >= 9) {
                 player2Pieces[i].isKing = true
             }
         }, 500)
 
     }
 
-    console.log('We moved a piece to ' + x + ' -- ' + y)
-
-
-    // if (multiply == 2) {
-
-    //     if (!hasPiece(x + (lengthOfSquare * 2), y + (lengthOfSquare * 2)) && hasPiece(x + lengthOfSquare, y + lengthOfSquare) && !isSameColor(x + lengthOfSquare, y + lengthOfSquare)) {
-    //         movePiece(x + (lengthOfSquare * 2), y + (lengthOfSquare * 2), i, playerNumber, 2)
-    //         deletePiece(x + lengthOfSquare, y + lengthOfSquare)
-    //         console.log('Here number 1')
-    //     } else if (!hasPiece(x + (lengthOfSquare * 2), y - (lengthOfSquare * 2)) && hasPiece(x + lengthOfSquare, y - lengthOfSquare) && !isSameColor(x + lengthOfSquare, y + lengthOfSquare)) {
-    //         movePiece(x + (lengthOfSquare * 2), y - (lengthOfSquare * 2), i, playerNumber, 2)
-    //         deletePiece(x + lengthOfSquare, y - lengthOfSquare)
-    //         console.log('Here number 2')
-    //     } else if (!hasPiece(x - (lengthOfSquare * 2), y + (lengthOfSquare * 2)) && hasPiece(x - lengthOfSquare, y + lengthOfSquare) && !isSameColor(x - lengthOfSquare, y + lengthOfSquare)) {
-    //         movePiece(x - (lengthOfSquare * 2), y + (lengthOfSquare * 2), i, playerNumber, 2)
-    //         deletePiece(x - lengthOfSquare, y + lengthOfSquare)
-    //         console.log('Here number 3')
-    //     } else if (!hasPiece(x - (lengthOfSquare * 2), y - (lengthOfSquare * 2)) && hasPiece(x - lengthOfSquare, y - lengthOfSquare) && !isSameColor(x - lengthOfSquare, y - lengthOfSquare)) {
-    //         movePiece(x - (lengthOfSquare * 2), y - (lengthOfSquare * 2), i, playerNumber, 2)
-    //         deletePiece(x - lengthOfSquare, y - lengthOfSquare)
-    //         console.log('Here number 4')
-    //     } else {
-    //         console.log('Checked but no where else to jump')
-    //         isSelected = false
-    //         selectedCircle.x = ""
-    //         selectedCircle.y = ""
-    //         c.strokeStyle = 'rgba(20, 20, 20, 1)'
-
-    //         if (myTurn) {
-    //             console.log('It is DEFINITELY not my turn')
-    //             myTurn = false
-    //             console.log('Not my turn')
-    //             playerColor = 'rgba(66, 244, 98, 1)'
-    //             setTimeout(function () {
-    //                 AITurn()
-    //             }, 50)
-    //         } else {
-    //             playerColor = 'rgba(66, 134, 244, 1)'
-    //             myTurn = true
-    //         }
-
-    //         animate()
-    //     }
-    // } else {
-    //     isSelected = false
-    //     selectedCircle.x = ""
-    //     selectedCircle.y = ""
-    //     c.strokeStyle = 'rgba(20, 20, 20, 1)'
-
-    //     if (myTurn) {
-    //         myTurn = false
-    //         console.log('Not my turn')
-    //         playerColor = 'rgba(66, 244, 98, 1)'
-    //         setTimeout(function () {
-    //             AITurn()
-    //         }, 50)
-    //     } else {
-    //         playerColor = 'rgba(66, 134, 244, 1)'
-    //         myTurn = true
-    //     }
-
-    //     animate()
-    // }
-
+    console.log('We moved a piece to ' + x + ',' + y)
 
     isSelected = false
     selectedCircle.x = ""
@@ -262,14 +205,16 @@ function movePiece(x, y, i, playerNumber, multiply) {
 function hasPiece(x, y) {
 
     for (var i = 0; i < player1Pieces.length; i++) {
-        if (Math.floor(x) == Math.floor(player1Pieces[i].x) && Math.floor(y) == Math.floor(player1Pieces[i].y)) {
+        if ((Math.floor(x) == Math.floor(player1Pieces[i].x) || Math.ceil(x) == Math.ceil(player1Pieces[i].x)) &&
+            (Math.floor(y) == Math.floor(player1Pieces[i].y) || Math.ceil(y) == Math.ceil(player1Pieces[i].y))) {
             console.log('piece there')
             return true
         }
     }
 
     for (var i = 0; i < player2Pieces.length; i++) {
-        if (Math.floor(x) == Math.floor(player2Pieces[i].x) && Math.floor(y) == Math.floor(player2Pieces[i].y)) {
+        if ((Math.floor(x) == Math.floor(player2Pieces[i].x) || Math.ceil(x) == Math.ceil(player2Pieces[i].x)) &&
+            (Math.floor(y) == Math.floor(player2Pieces[i].y) || Math.ceil(y) == Math.ceil(player2Pieces[i].y))) {
             console.log('piece there')
             return true
         }
@@ -301,10 +246,19 @@ function isMovingHorizontal(selectedCircle, x, y) {
     return false;
 }
 
+function displayPlayer2() {
+    console.log('Printing out player 2 pieces!')
+    for (var i = 0; i < player2Pieces.length; i++) {
+        console.log('Index ' + (i + 1) + ' ' + player2Pieces[i].x + ' , ' + player2Pieces[i].y)
+    }
+}
+
 
 function deletePiece(x, y) {
+    console.log('WE JUST DELETED A PIECE AT ' + '(' + x + ')' + '(' + y + ')')
     for (var i = 0; i < player1Pieces.length; i++) {
-        if (Math.floor(player1Pieces[i].x) == Math.floor(x) && Math.floor(player1Pieces[i].y) == Math.floor(y)) {
+        if ((Math.floor(player1Pieces[i].x) == Math.floor(x) || Math.ceil(player1Pieces[i].x) == Math.ceil(x)) &&
+            (Math.floor(player1Pieces[i].y) == Math.floor(y) || Math.ceil(player1Pieces[i].y) == Math.ceil(y))) {
             player1Pieces[i].x = -100
             player1Pieces[i].y = -100
             player1Pieces[i].isAlive = false
@@ -312,7 +266,8 @@ function deletePiece(x, y) {
     }
 
     for (var i = 0; i < player2Pieces.length; i++) {
-        if (Math.floor(player2Pieces[i].x) == Math.floor(x) && Math.floor(player2Pieces[i].y) == Math.floor(y)) {
+        if ((Math.floor(player2Pieces[i].x) == Math.floor(x) || Math.ceil(player2Pieces[i].x) == Math.ceil(x)) &&
+            (Math.floor(player2Pieces[i].y) == Math.floor(y) || Math.ceil(player2Pieces[i].y) == Math.ceil(y))) {
             player2Pieces[i].x = -100
             player2Pieces[i].y = -100
             player2Pieces[i].isAlive = false
@@ -387,6 +342,10 @@ function isMovingInRightDirection(selectedCircle, x, y) {
     // Find piece
     // If king, return true
     // If else, determine if moving in right direction
+}
+
+function getPoints() {
+    console.log('AI: ' + AIPoints + ' Me: ' + myPoints)
 }
 
 // Event listener that displays mouse coordinates
@@ -473,20 +432,14 @@ canvas.addEventListener('mousedown', function (event) {
                 // Check to see if a person is already on that square first, write function. Pass x and y and return bool
                 if (!hasPiece(x, y) && !isMovingHorizontal(selectedCircle, x, y) && isMovingInRightDirection(selectedCircle, x, y) && hasPiece(halfwayX, halfwayY) && !isSameColor(halfwayX, halfwayY)) {
 
-                    if (myTurn) {
-                        myPoints++
-                    } else if (!myTurn) {
-                        AIPoints++
-                    }
+                    myPoints++
 
                     if (myPoints >= 13) {
                         alert('You have won the match!')
-
-                    } else if (AIPoints >= 13) {
-                        alert('You have lost the match!')
-
                     }
+
                     deletePiece(halfwayX, halfwayY)
+
                     for (var i = 0; i < player2Pieces.length; i++) {
 
                         var tempVarX = Math.floor(selectedCircle.x) - Math.floor(player2Pieces[i].x)
@@ -543,16 +496,16 @@ player1Pieces = [
         isKing: false,
         isAlive: true,
         direction: 'down',
-        position: 0
+        position: 1
     },
     {
         x: (canvas.width / numRows) / 2,
         y: (canvas.width / numRows) / 2 + (canvas.width / numRows),
         color: player1Color,
-        isKing: true,
+        isKing: false,
         isAlive: true,
         direction: 'down',
-        position: canvas.width / numRows
+        position: 2
     },
     {
         x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -561,7 +514,7 @@ player1Pieces = [
         isKing: false,
         isAlive: true,
         direction: 'down',
-        position: (canvas.width / numRows) * 2
+        position: 3
     }
 ]
 
@@ -575,7 +528,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: 0
+            position: 1
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -584,7 +537,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: canvas.width / numRows
+            position: 2
         },
         {
             x: (canvas.width / numRows) / 2,
@@ -593,7 +546,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: (canvas.width / numRows) * 2
+            position: 3
         }
     ]
 } else {
@@ -605,7 +558,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: 0
+            position: 3
         },
         {
             x: (canvas.width / numRows) / 2,
@@ -614,7 +567,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: canvas.width / numRows
+            position: 2
         },
         {
             x: (canvas.width / numRows) / 2 + (canvas.width / numRows),
@@ -623,7 +576,7 @@ if (numRows % 2 == 0) {
             isKing: false,
             isAlive: true,
             direction: 'up',
-            position: (canvas.width / numRows) * 2
+            position: 1
         }
     ]
 }
@@ -663,8 +616,6 @@ function drawPieces(pieces) {
             c.fill();
             c.stroke()
         } else if (pieces[i].isAlive && pieces[i].isKing) {
-
-            console.log('This pice is a king!')
             var oldFillStyle = c.fillStyle
 
             c.beginPath()
@@ -673,13 +624,15 @@ function drawPieces(pieces) {
             c.fill()
             c.stroke()
 
-            console.log('Here')
+            c.strokeStyle = '#cc8ee5'
             c.beginPath()
-            c.arc(pieces[i].x, pieces[i].y, 1, Math.PI * 2, false)
+            c.arc(pieces[i].x, pieces[i].y, 12, Math.PI * 2, false)
             //c.fillStyle = pieces[i].color;
             c.fill()
             c.stroke()
             c.fillStyle = oldFillStyle
+
+            c.strokeStyle = '#000000'
 
 
         }
