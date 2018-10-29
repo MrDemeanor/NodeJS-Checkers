@@ -139,7 +139,7 @@ io.on('connection', function (socket) {
 
     // Sends a message to the loser in a match
     socket.on('you-lost', function() {
-        io.sockets.emit('loser')
+        io.broadcast.emit('loser')
     })
 
     // Updates the board 
