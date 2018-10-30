@@ -45,10 +45,6 @@ app.get('/multiplayer/', function (req, res) {
     }, 2000)
 })
 
-app.get('/test_board', function(req, res) {
-    res.sendFile(path.join(__dirname + '/public/test_board.html'))
-})
-
 app.get('/spectator', function (req, res) {
     res.sendFile(path.join(__dirname + '/public/spectator.html'));
 })
@@ -70,6 +66,10 @@ app.get('/subscribe/myNumber', function(req, res) {
 
     Twilio.subscribe(number)
 
+})
+
+app.get('/rules', function(req, res) {
+    res.sendFile(path.join(__dirname + '/public/rules.html'))
 })
 
 app.get('/unsubscribe', function (req, res) {
@@ -163,6 +163,8 @@ io.on('connection', function (socket) {
     // These are the things that happen when someone disconnects from a multiplayer game
     socket.on('disconnect', function () {
 
+        console.log('User disconnected!')
+
         // If you are a player and disconnect, sockets will be notified
         if (handshakeData._query['person'] != 'spectator') {
             io.sockets.emit('disconnected')
@@ -202,28 +204,28 @@ io.on('connection', function (socket) {
 })
 
 // Create route that will let us write our api
-var router = express.Router()
+var api = express.Router()
 
 // Size will be determiend by another page
 var boardSize = 10
 
 // Makes all of our APIs prefix with /api
-app.use('/api', router)
+app.use('/api', api)
 
 // Retrieves the server for parsing and passes into JSON
-router.get('/get_server', function(req, res) {
+api.get('/get_server', function(req, res) {
     res.json({
         server: server
     })
 })
 
-router.get('/add_number', function(req, res) {
+api.get('/add_number', function(req, res) {
     res.json({
         myNumber: Twilio.subscribe('5127495923')
     })
 })
 
-router.get('/test_socket_emptiness', function(req, res) {
+api.get('/test_socket_emptiness', function(req, res) {
     res.json({
         players: playerSocket.size, 
         spectators: spectatorSocket.size
